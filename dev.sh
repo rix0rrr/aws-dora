@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# AWS API Explorer Development Startup Script
+# AWS API Explorer Development Startup Script (TypeScript)
 
-echo "Starting AWS API Explorer in development mode..."
+echo "Starting AWS API Explorer in development mode with TypeScript..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
@@ -21,7 +21,7 @@ if [ -z "$PORT" ]; then
     export PORT=3000
 fi
 
-echo "Starting development server with auto-reload..."
+echo "Starting TypeScript development server with auto-reload..."
 echo "Access the application at: http://localhost:$PORT"
 echo "Press Ctrl+C to stop the server"
 echo ""

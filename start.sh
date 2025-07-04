@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# AWS API Explorer Startup Script
+# AWS API Explorer Startup Script (TypeScript)
 
-echo "Starting AWS API Explorer..."
+echo "Starting AWS API Explorer (TypeScript build)..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
@@ -25,6 +25,16 @@ if [ ! -d "node_modules" ]; then
     npm install
     if [ $? -ne 0 ]; then
         echo "Error: Failed to install dependencies."
+        exit 1
+    fi
+fi
+
+# Build TypeScript if dist directory doesn't exist
+if [ ! -d "dist" ]; then
+    echo "Building TypeScript..."
+    npm run build
+    if [ $? -ne 0 ]; then
+        echo "Error: TypeScript build failed."
         exit 1
     fi
 fi
@@ -52,7 +62,7 @@ if [ -z "$AWS_ACCESS_KEY_ID" ] && [ ! -f "$HOME/.aws/credentials" ]; then
 fi
 
 # Start the server
-echo "Starting server on port $PORT..."
+echo "Starting compiled TypeScript server on port $PORT..."
 echo "Access the application at: http://localhost:$PORT"
 echo "Press Ctrl+C to stop the server"
 echo ""
