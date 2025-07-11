@@ -10,7 +10,7 @@ import { EmptyRequestForm } from './components/ApiRequestForm';
 import { CredentialsSelector, EmptyCredentialsSelector } from './components/CredentialsSelector';
 import { EmptyRequestLogger } from './components/RequestLogger';
 import { AWS_SERVICES } from './services/awsServices';
-import { detectCredentials } from './services/credentialsManager';
+import { detectCredentialSources } from './services/credentialsManager';
 
 // Import routes
 import servicesRouter from './routes/services';
@@ -26,7 +26,8 @@ const NODE_ENV: string = process.env.NODE_ENV || 'development';
 // Application configuration
 const config: AppConfig = {
   port: PORT,
-  defaultRegion: process.env.AWS_DEFAULT_REGION || 'us-east-1',
+  // FIXME: Region from AWS config
+  defaultRegion: process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION ?? 'us-east-1',
   logLevel: (process.env.LOG_LEVEL as AppConfig['logLevel']) || 'info'
 };
 
@@ -34,7 +35,7 @@ const config: AppConfig = {
 if (NODE_ENV === 'production') {
   // Enable trust proxy for production
   app.set('trust proxy', 1);
-  
+
   // Add security headers
   app.use((req: Request, res: Response, next: NextFunction): void => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -78,17 +79,17 @@ app.use('/logs', logsRouter);
 app.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     // Detect available credentials
-    const credentials: CredentialSource[] = await detectCredentials();
-    
+    const credentials: CredentialSource[] = await detectCredentialSources();
+
     // Render the components
     const treeHtml: string = renderJSX(ServicesTree, { services: AWS_SERVICES });
     const filterHtml: string = renderJSX(FilterBar, {});
     const requestFormHtml: string = renderJSX(EmptyRequestForm, {});
-    const credentialsHtml: string = credentials.length > 0 
+    const credentialsHtml: string = credentials.length > 0
       ? renderJSX(CredentialsSelector, { credentials })
       : renderJSX(EmptyCredentialsSelector, {});
     const loggerHtml: string = renderJSX(EmptyRequestLogger, {});
-    
+
     const html: string = '<!DOCTYPE html>' + renderJSX(Layout, {
       treeContent: treeHtml,
       filterContent: filterHtml,

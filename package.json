@@ -2,12 +2,12 @@
   "name": "aws-api-explorer",
   "version": "1.0.0",
   "description": "Web application for exploring and testing AWS APIs",
-  "main": "dist/server.js",
   "scripts": {
+    "scrape-calls": "tsx build-tools/scrape-calls.ts",
     "build": "tsc",
     "start": "NODE_ENV=production node dist/server.js",
-    "dev": "NODE_ENV=development nodemon --exec ts-node src/server.ts",
-    "dev:watch": "NODE_ENV=development nodemon --watch src --ext ts,tsx --exec ts-node src/server.ts",
+    "dev": "NODE_ENV=development nodemon --exec tsx src/server.ts",
+    "dev:watch": "NODE_ENV=development nodemon --watch src --ext ts,tsx --exec tsx src/server.ts",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "prestart": "npm run build",
@@ -44,7 +44,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
+    "tsx": "4.20.3",
     "typescript": "^5.8.3"
   }
 }

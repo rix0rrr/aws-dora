@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { detectCredentials } from '../services/credentialsManager';
+import { detectCredentialSources } from '../services/credentialsManager';
 import { CredentialSource } from '../types';
 
 const router = express.Router();
@@ -14,7 +14,7 @@ function renderJSX(component: React.ComponentType<Record<string, unknown>>, prop
 // Get all available credentials
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
-    const credentials = await detectCredentials();
+    const credentials = await detectCredentialSources();
     res.json(credentials);
   } catch (error) {
     console.error('Error detecting credentials:', error);
@@ -25,24 +25,24 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 // Handle credential selection
 router.get('/select', (req: Request, res: Response): void => {
   const { credentials } = req.query;
-  
+
   if (!credentials || typeof credentials !== 'string') {
     res.send('');
     return;
   }
-  
+
   try {
     const credentialInfo: CredentialSource = JSON.parse(credentials);
-    
+
     const html = `
       <div class="text-sm text-gray-600 bg-gray-50 p-2 rounded">
         <div>Type: ${credentialInfo.type}</div>
         <div class="mt-1">Region: ${credentialInfo.region || 'us-east-1'}</div>
-        ${credentialInfo.type === 'profile' && credentialInfo.profile ? 
+        ${credentialInfo.type === 'profile' && credentialInfo.profile ?
           `<div class="mt-1">Profile: ${credentialInfo.profile.name}</div>` : ''}
       </div>
     `;
-    
+
     res.send(html);
   } catch (error) {
     console.error('Error parsing credentials:', error);

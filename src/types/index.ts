@@ -1,9 +1,28 @@
 import { Request, Response } from 'express';
 
+export interface AWSServiceList {
+  services: AWSService[];
+}
+
+export interface AWSOperationNode {
+  resources: AWSResource[];
+  operations: AWSOperation[];
+}
+
 // AWS Service Types
-export interface AWSService {
+export interface AWSService extends AWSOperationNode {
   name: string;
-  operations: string[];
+  shortName: string;
+}
+
+export interface AWSResource extends AWSOperationNode{
+  name: string;
+}
+
+export interface AWSOperation {
+  name: string;
+  description?: string;
+  requestTemplate?: Record<string, unknown>;
 }
 
 export interface AWSServiceCategory {
