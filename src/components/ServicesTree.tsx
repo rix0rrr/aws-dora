@@ -28,10 +28,11 @@ export function ServicesTreeService({ service, serviceModel }: ServersTreeServic
   return <div key={service.shortName} className="expando">
     <h3
       key="header"
-      className="p-2 text-md font-light text-gray-600 bg-yellow-100 hover:bg-blue-50 hover:text-blue-700 cursor-pointer tracking-wide pointer"
+      className="p-2 text-md font-light text-gray-600 bg-yellow-100 hover:bg-blue-50 hover:text-blue-700 cursor-pointer tracking-wide pointer whitespace-nowrap overflow-hidden"
       hx-post={`/tree/toggle/${service.nodeId}`}
       hx-target="closest .expando"
       hx-swap="outerHTML"
+      title={service.name}
     >{service.name}</h3>
 
     {expanded
@@ -57,10 +58,11 @@ export function ServicesTreeResource({ resource, serviceModel }: ServicesTreeRes
   return <div key={resource.name} className="expando space-y-1">
     <div
       key="resource-header"
-      className="border rounded-md border-gray-300 p-2 text-sm font-semibold text-gray-500 hover:bg-blue-50 hover:text-blue-700 uppercase cursor-pointer tracking-wide mb-2"
+      className="border rounded-md border-gray-300 p-2 text-sm font-semibold text-gray-500 hover:bg-blue-50 hover:text-blue-700 uppercase cursor-pointer tracking-wide mb-2 whitespace-nowrap overflow-hidden"
       hx-post={`/tree/toggle/${resource.nodeId}`}
       hx-target="closest .expando"
       hx-swap="outerHTML"
+      title={resource.name}
     ><span className={chevron}></span> {resource.name}</div>
 
     {expanded
@@ -75,8 +77,9 @@ export function ServicesTreeResource({ resource, serviceModel }: ServicesTreeRes
 function renderOperation(op: AWSOperation): React.ReactElement {
   return <div
     key={op.operationId}
-    className="tree-item p-2 text-sm text-gray-900 rounded cursor-pointer hover:bg-blue-50 hover:text-blue-700"
+    className="tree-item p-2 text-sm text-gray-900 rounded cursor-pointer hover:bg-blue-50 hover:text-blue-700 whitespace-nowrap overflow-hidden"
     hx-get={`/api-template/${op.operationId}`}
     hx-target="#request-form"
+    title={op.name}
   >{op.name}</div>;
 }
