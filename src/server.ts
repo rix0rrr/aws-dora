@@ -68,15 +68,15 @@ async function startup() {
 
       // Render the components
       const requestFormHtml: string = renderJSX(EmptyRequestForm, {});
-      const credentialsHtml: string = credentials.length > 0
-        ? renderJSX(CredentialsSelector, { credentials })
-        : renderJSX(EmptyCredentialsSelector, {});
+      const credentialsContent = credentials.length > 0
+        ? CredentialsSelector({ credentials })
+        : EmptyCredentialsSelector();
       const loggerHtml: string = renderJSX(EmptyRequestLogger, {});
 
       const html: string = '<!DOCTYPE html>' + renderJSX(Layout, {
         serviceModel,
         requestFormContent: requestFormHtml,
-        credentialsContent: credentialsHtml,
+        credentialsContent,
         loggerContent: loggerHtml
       });
       res.send(html);

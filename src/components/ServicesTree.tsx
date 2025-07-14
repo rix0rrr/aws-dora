@@ -80,8 +80,3 @@ function renderOperation(op: AWSOperation): React.ReactElement {
     hx-target="#request-form"
   >{op.name}</div>;
 }
-
-interface ResourceHaverProps {
-  resources: AWSResource[];
-  operations: AWSOperation[];
-}

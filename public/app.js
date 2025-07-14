@@ -4,13 +4,59 @@
 document.addEventListener('DOMContentLoaded', function() {
   initializeSyntaxHighlighting();
   initializeJsonEditor();
+
+  document.addEventListener('mousedown', onMouseDown);
+  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('mousemove', onMouseMove);
 });
 
 // Re-initialize after HTMX updates
-document.addEventListener('htmx:afterSwap', function() {
+document.addEventListener('htmx:afterSwap', function(detail) {
   initializeSyntaxHighlighting();
   initializeJsonEditor();
 });
+
+let startSize;
+let startX;
+let reverse = 1;
+let resizing;
+
+/**
+ * @param {MouseEvent} event
+ */
+function onMouseDown(event) {
+  const sizeGrip = htmx.closest(event.target, '.size-grip');
+  if (!sizeGrip) {
+    return;
+  }
+
+  const dir = sizeGrip.getAttribute('data-dir');
+  const sizeTarget = dir === 'right' ? sizeGrip.nextElementSibling : sizeGrip.previousElementSibling;
+  if (!sizeTarget) {
+    return;
+  }
+
+  reverse = dir === 'right' ? -1 : 1;
+
+  resizing = sizeTarget;
+  startSize = sizeTarget.offsetWidth;
+  startX = event.screenX;
+  event.preventDefault(); // Prevent text selection
+}
+
+function onMouseMove(event) {
+  if (!resizing) {
+    return;
+  }
+
+  let deltaX = event.screenX - startX;
+  resizing.style.width = `${startSize + deltaX * reverse}px`;
+}
+
+function onMouseUp() {
+  resizing = undefined;
+}
+
 
 // Initialize Prism syntax highlighting
 function initializeSyntaxHighlighting() {

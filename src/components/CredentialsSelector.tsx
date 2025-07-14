@@ -6,51 +6,50 @@ interface ExtendedCredentialsSelectorProps extends CredentialsSelectorProps {
 }
 
 export function CredentialsSelector({ credentials = [], selected, selectedCredential = null }: ExtendedCredentialsSelectorProps): React.ReactElement {
-  return React.createElement('div', { className: 'mb-4' }, [
-    React.createElement('label', {
-      key: 'label',
-      className: 'block text-sm font-medium text-gray-700 mb-2'
-    }, 'AWS Credentials'),
-    
-    React.createElement('select', {
-      key: 'selector',
-      id: 'credentials-selector',
-      name: 'credentials',
-      className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-      'hx-get': '/credentials/select',
-      'hx-target': '#credentials-info',
-      'hx-swap': 'innerHTML',
-      'hx-trigger': 'change'
-    }, [
-      React.createElement('option', {
-        key: 'default',
-        value: ''
-      }, 'Select credentials...'),
-      
-      ...credentials.map((cred, index) => 
-        React.createElement('option', {
-          key: index,
-          value: JSON.stringify(cred),
-          selected: (selectedCredential && selectedCredential.name === cred.name) || (selected && selected.name === cred.name)
-        }, cred.name)
-      )
-    ]),
-    
-    // Credentials info display
-    React.createElement('div', {
-      key: 'info',
-      id: 'credentials-info',
-      className: 'mt-2'
-    }, (selectedCredential || selected) ? 
-      React.createElement('div', {
-        className: 'text-sm text-gray-600 bg-gray-50 p-2 rounded'
-      }, [
-        React.createElement('div', { key: 'type' }, `Type: ${(selectedCredential || selected)?.type}`),
-        React.createElement('div', { key: 'region', className: 'mt-1' }, 
-          `Region: ${(selectedCredential || selected)?.region || 'us-east-1'}`)
-      ]) : null
-    )
-  ]);
+  return (
+    <span>
+      <label className="text-sm font-medium text-gray-700 mr-4" htmlFor="credentials-selector">
+        AWS Credentials
+      </label>
+      <select
+        id="credentials-selector"
+        name="credentials"
+        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        hx-get="/credentials/select"
+        hx-target="#credentials-info"
+        hx-swap="innerHTML"
+        hx-trigger="change"
+        value={
+          selectedCredential
+            ? JSON.stringify(selectedCredential)
+            : selected
+            ? JSON.stringify(selected)
+            : ''
+        }
+        onChange={() => {}}
+      >
+        <option value="">Select credentials...</option>
+        {credentials.map((cred, index) => (
+          <option
+            key={index}
+            value={JSON.stringify(cred)}
+          >
+            {cred.name}
+          </option>
+        ))}
+      </select>
+      <div id="credentials-info" className="mt-2">
+        {(selectedCredential || selected) ? (
+          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+            <div>Type: {(selectedCredential || selected)?.type}</div>
+            <div className="mt-1">
+              Region: {(selectedCredential || selected)?.region || 'us-east-1'}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </span>
+  );
 }
 
 export function EmptyCredentialsSelector(): React.ReactElement {
@@ -73,7 +72,7 @@ export function EmptyCredentialsSelector(): React.ReactElement {
         }, 'No AWS credentials detected. Please configure credentials to make API calls.')
       ])
     ]),
-    
+
     React.createElement('div', {
       key: 'help',
       className: 'mt-2 text-xs text-gray-500'
