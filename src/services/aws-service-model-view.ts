@@ -11,13 +11,19 @@ export class AwsServiceModelView {
   }
 
   private readonly expanded = new Set<string>();
-  public readonly services: AWSService[];
-  private readonly nodeIdMap = new Map<string, AWSResourceHaver>();
+  private readonly services: AWSService[];
+  private _currentFilter: string = '';
 
   constructor(services: AWSServiceList) {
     this.services = services.services;
+  }
 
-    this.indexNodeIds();
+  public get currentFilter(): string {
+    return this._currentFilter;
+  }
+
+  public setFilter(filter: string): void {
+    this._currentFilter = filter;
   }
 
   public toggleExpanded(resourceHaver: AWSResourceHaver | string): void {
@@ -30,64 +36,70 @@ export class AwsServiceModelView {
     }
   }
 
-  public getNodeById(node: string) {
-    const ret = this.nodeIdMap.get(node);
-    if (!ret) {
-      throw new Error(`Node with ID ${node} not found in AWS service model`);
+  public getNodeById(node: string): AWSResourceHaver | undefined {
+    const self = this;
+    let ret: AWSResourceHaver | undefined;
+    for (const service of this.filtered()) {
+      recurse(service);
     }
     return ret;
+
+    function recurse(resourceHaver: AWSResourceHaver) {
+      if (resourceHaver.nodeId === node) {
+        ret = resourceHaver;
+        return;
+      }
+
+      for (const resource of resourceHaver.resources) {
+        recurse(resource);
+      }
+    }
   }
 
   public isExpanded(resourceHaver: AWSResourceHaver): boolean {
     return this.expanded.has(resourceHaver.nodeId);
   }
 
-  public filtered(searchTerm: string): AWSServiceList {
-    return {
-      services: this.services
+  public filtered(): AWSService[] {
+    if (this._currentFilter === '') {
+      return this.services;
+    }
+
+    const self = this;
+
+    return this.services
         .map(service => {
-          if (matches(searchTerm, service.name) || matches(searchTerm, service.shortName)) {
+          if (this.matches(service.name) || this.matches(service.shortName)) {
             return service;
           }
 
           return {
             ...service,
-            operations: service.operations
-              .filter(matchingOperation),
-            resources: service.resources
-              .map(filterResourceMembers)
-              .filter(hasMembers),
+            operations: service.operations.filter(matchingOperation),
+            resources: service.resources.map(filterResourceMembers).filter(hasMembers),
           };
-        })
-        .filter(hasMembers),
-    };
+        }).filter(hasMembers);
 
     function matchingOperation(op: AWSOperation): boolean {
-      return matches(searchTerm, op.name) || matches(searchTerm, op.description || '');
+      const ret = self.matches(op.name) || self.matches(op.description || '');
+      return ret;
     }
 
     function filterResourceMembers(resource: AWSResource): AWSResource {
+      if (self.matches(resource.name)) {
+        return resource;
+      }
+
       return {
         ...resource,
         operations: resource.operations.filter(matchingOperation),
-        resources: resource.resources.map(filterResourceMembers)
+        resources: resource.resources.map(filterResourceMembers).filter(hasMembers),
       };
     }
   }
 
-  private indexNodeIds() {
-    const self = this;
-    for (const service of this.services) {
-      recurse(service);
-    }
-
-    function recurse(resourceHaver: AWSResourceHaver) {
-      self.nodeIdMap.set(resourceHaver.nodeId, resourceHaver);
-
-      for (const resource of resourceHaver.resources) {
-        recurse(resource);
-      }
-    }
+  private matches(haystack: string): boolean {
+    return matches(this._currentFilter, haystack);
   }
 }
 
@@ -96,7 +108,9 @@ function hasMembers(x: AWSResource | AWSService): boolean {
 }
 
 function matches(needle: string, haystack: string): boolean {
-  return haystack.toLowerCase().includes(needle.toLowerCase());
+  const parts = needle.toLowerCase().split(/\s+/);
+  haystack = haystack.toLowerCase();
+  return parts.every(part => haystack.includes(part));
 }
 
 interface TemplateDefinition {

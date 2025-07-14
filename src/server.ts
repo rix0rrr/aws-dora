@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction, Application } from 'express';
 
 import { AppConfig, CredentialSource } from './types';
 import Layout from './components/Layout';
-import { ServicesTree, FilterBar } from './components/ServicesTree';
+import { ServicesTree } from './components/ServicesTree';
 import { EmptyRequestForm } from './components/ApiRequestForm';
 import { CredentialsSelector, EmptyCredentialsSelector } from './components/CredentialsSelector';
 import { EmptyRequestLogger } from './components/RequestLogger';
@@ -15,7 +15,7 @@ import credentialsRouter from './routes/credentials';
 import executeRouter from './routes/execute';
 import logsRouter from './routes/logs';
 import { renderJSX } from './util/jsx';
-import { AwsServiceModelView } from './services/awsServices';
+import { AwsServiceModelView } from './services/aws-service-model-view';
 
 async function startup() {
   const serviceModel = await AwsServiceModelView.fromBuiltinModel();
@@ -67,7 +67,6 @@ async function startup() {
       const credentials: CredentialSource[] = await detectCredentialSources();
 
       // Render the components
-      const filterHtml: string = renderJSX(FilterBar, {});
       const requestFormHtml: string = renderJSX(EmptyRequestForm, {});
       const credentialsHtml: string = credentials.length > 0
         ? renderJSX(CredentialsSelector, { credentials })
@@ -75,10 +74,7 @@ async function startup() {
       const loggerHtml: string = renderJSX(EmptyRequestLogger, {});
 
       const html: string = '<!DOCTYPE html>' + renderJSX(Layout, {
-        serviceTree: ServicesTree({
-          serviceModel,
-        }),
-        filterContent: filterHtml,
+        serviceModel,
         requestFormContent: requestFormHtml,
         credentialsContent: credentialsHtml,
         loggerContent: loggerHtml

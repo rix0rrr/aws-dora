@@ -1,9 +1,11 @@
 import React from 'react';
 import { ServicesTree } from './ServicesTree';
 import { AWSServiceList } from '../types/model';
+import { AwsServiceModelView } from '../services/aws-service-model-view';
+import { FilterBar } from './FilterBar';
 
 interface ExtendedLayoutProps {
-  serviceTree: React.ReactElement;
+  serviceModel: AwsServiceModelView;
   title?: string;
   treeContent?: string;
   filterContent?: string;
@@ -13,7 +15,7 @@ interface ExtendedLayoutProps {
 }
 
 function Layout({
-  serviceTree,
+  serviceModel,
   title = 'AWS API Explorer',
   treeContent = '',
   requestFormContent = '',
@@ -41,6 +43,10 @@ function Layout({
         key: 'tailwind',
         src: 'https://cdn.tailwindcss.com'
       }),
+
+      // Font awesome
+      React.createElement('link', { rel: 'stylesheet', href: '/fontawesome/css/fontawesome.min.css' }),
+      React.createElement('link', { rel: 'stylesheet', href: '/fontawesome/css/solid.min.css' }),
 
       // Prism.js for syntax highlighting
       React.createElement('link', {
@@ -112,14 +118,13 @@ function Layout({
             React.createElement('div', {
               key: 'filter',
               id: 'filter-section',
-            }, serviceTree),
+            }, FilterBar({ searchTerm: serviceModel.currentFilter })),
           ]),
           React.createElement('div', {
             key: 'tree-container',
             className: 'flex-1 overflow-y-auto p-4',
             id: 'services-tree',
-            dangerouslySetInnerHTML: { __html: treeContent }
-          })
+          }, ServicesTree({ serviceModel })),
         ]),
 
         // Main content

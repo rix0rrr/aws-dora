@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { generateRequestPayload, getFieldMetadata } from '../services/awsServices';
+import { generateRequestPayload, getFieldMetadata } from '../services/aws-service-model-view';
 import { ApiRequestForm } from '../components/ApiRequestForm';
 import { renderJSX } from '../util/jsx';
 
