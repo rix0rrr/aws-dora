@@ -6,11 +6,6 @@ import { CredentialSource } from '../types';
 
 const router = express.Router();
 
-// Helper function to render JSX
-function renderJSX(component: React.ComponentType<Record<string, unknown>>, props: Record<string, unknown> = {}): string {
-  return renderToString(React.createElement(component, props));
-}
-
 // Get all available credentials
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {

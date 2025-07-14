@@ -1,79 +1,87 @@
 import React from 'react';
-import { ServicesTreeProps, AWSServices } from '../types';
+import { AWSOperation, AWSResource, AWSService, AWSServiceList } from '../types/model';
+import { AwsServiceModelView } from '../services/awsServices';
 
-interface ExtendedServicesTreeProps extends ServicesTreeProps {
-  expandedServices?: string[];
+interface ServicesTreeProps {
+  serviceModel: AwsServiceModelView;
 }
 
-export function ServicesTree({ services, expandedServices = [] }: ExtendedServicesTreeProps): React.ReactElement {
-  return React.createElement('div', { className: 'space-y-2' }, 
-    Object.keys(services).map(category => 
-      React.createElement('div', { key: category, className: 'mb-4' }, [
-        // Category header
-        React.createElement('h3', {
-          key: 'header',
-          className: 'text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2'
-        }, category),
-        
-        // Services in category
-        React.createElement('div', { key: 'services', className: 'ml-2 space-y-1' },
-          Object.keys(services[category] || {}).map(service => {
-            const serviceData = services[category]?.[service];
-            if (!serviceData) return null;
-            
-            const isExpanded = expandedServices.includes(service);
-            return React.createElement('div', { key: service }, [
-              // Service name (clickable to expand)
-              React.createElement('div', {
-                key: 'service-header',
-                className: 'tree-item p-2 rounded cursor-pointer flex items-center justify-between hover:bg-gray-100',
-                'hx-get': `/services/${service}`,
-                'hx-target': `#service-${service}-operations`,
-                'hx-swap': 'innerHTML',
-                'hx-indicator': `#loading-${service}`
-              }, [
-                React.createElement('span', {
-                  key: 'name',
-                  className: 'font-medium text-gray-800'
-                }, service),
-                React.createElement('div', {
-                  key: 'icons',
-                  className: 'flex items-center'
-                }, [
-                  React.createElement('span', {
-                    key: 'loading',
-                    id: `loading-${service}`,
-                    className: 'htmx-indicator text-blue-500 mr-2'
-                  }, '⟳'),
-                  React.createElement('span', {
-                    key: 'icon',
-                    className: `text-gray-400 ${isExpanded ? 'rotate-90' : ''}`
-                  }, '▶')
-                ])
-              ]),
-              
-              // Operations container (populated by HTMX)
-              React.createElement('div', {
-                key: 'operations',
-                id: `service-${service}-operations`,
-                className: 'ml-4 mt-1'
-              }, isExpanded ? 
-                serviceData.operations.map(operation =>
-                  React.createElement('div', {
-                    key: operation,
-                    className: 'tree-item p-2 text-sm text-gray-600 rounded cursor-pointer hover:bg-blue-50 hover:text-blue-700',
-                    'hx-get': `/api-template/${service}/${operation}`,
-                    'hx-target': '#request-form',
-                    'hx-swap': 'innerHTML'
-                  }, operation)
-                ) : null
-              )
-            ]);
-          })
-        )
-      ])
-    )
+export function ServicesTree({ serviceModel }: ServicesTreeProps): React.ReactElement {
+  // Tree
+  return React.createElement('div', { className: 'space-y-2' },
+    serviceModel.services.map(service => ServicesTreeService({
+      service,
+      serviceModel,
+    })),
   );
+}
+
+
+interface ServersTreeServiceProps {
+  service: AWSService;
+  serviceModel: AwsServiceModelView;
+}
+
+export function ServicesTreeService({ service, serviceModel }: ServersTreeServiceProps): React.ReactElement {
+  const expanded = serviceModel.isExpanded(service);
+
+  return <div key={service.shortName} className="expando">
+    <h3
+      key="header"
+      className="p-2 text-lg font-light text-gray-600 bg-yellow-100 hover:bg-blue-50 hover:text-blue-700 cursor-pointer tracking-wide pointer"
+      hx-post={`/tree/toggle/${service.nodeId}`}
+      hx-target="closest .expando"
+      hx-swap="outerHTML"
+    >{service.name}</h3>
+
+    {expanded
+      ? <div className="ml-2">
+        {service.resources.map(resource => ServicesTreeResource({ resource, serviceModel }) )}
+        {service.operations.map(renderOperation)}
+        </div>
+      : undefined}
+  </div>;
+}
+
+interface ServicesTreeResourceProps {
+  resource: AWSResource;
+  serviceModel: AwsServiceModelView;
+}
+
+
+export function ServicesTreeResource({ resource, serviceModel }: ServicesTreeResourceProps): React.ReactElement {
+  const expanded = serviceModel.isExpanded(resource);
+
+  return <div key={resource.name} className="expando space-y-1">
+    <div
+      key="resource-header"
+      className="p-2 text-sm font-semibold text-gray-500 hover:bg-blue-50 hover:text-blue-700 uppercase cursor-pointer tracking-wide mb-2"
+      hx-post={`/tree/toggle/${resource.nodeId}`}
+      hx-target="closest .expando"
+      hx-swap="outerHTML"
+    >{resource.name}</div>
+
+    {expanded
+      ? <div className="ml-2">
+        {resource.resources.map(resource => ServicesTreeResource({ resource, serviceModel }) )}
+        {resource.operations.map(renderOperation)}
+        </div>
+      : undefined}
+  </div>;
+}
+
+function renderOperation(op: AWSOperation): React.ReactElement {
+  return <div
+    key={op.operationId}
+    className="tree-item p-2 text-sm text-gray-900 rounded cursor-pointer hover:bg-blue-50 hover:text-blue-700"
+    hx-get={`/api-template/${op.operationId}`}
+    hx-target="#request-form"
+  >{op.name}</div>;
+}
+
+interface ResourceHaverProps {
+  resources: AWSResource[];
+  operations: AWSOperation[];
 }
 
 interface FilterBarProps {

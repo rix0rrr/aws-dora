@@ -1,38 +1,5 @@
 import { Request, Response } from 'express';
 
-export interface AWSServiceList {
-  services: AWSService[];
-}
-
-export interface AWSOperationNode {
-  resources: AWSResource[];
-  operations: AWSOperation[];
-}
-
-// AWS Service Types
-export interface AWSService extends AWSOperationNode {
-  name: string;
-  shortName: string;
-}
-
-export interface AWSResource extends AWSOperationNode{
-  name: string;
-}
-
-export interface AWSOperation {
-  name: string;
-  description?: string;
-  requestTemplate?: Record<string, unknown>;
-}
-
-export interface AWSServiceCategory {
-  [serviceName: string]: AWSService;
-}
-
-export interface AWSServices {
-  [category: string]: AWSServiceCategory;
-}
-
 // Credential Types
 export interface AWSCredentials {
   accessKeyId: string;
@@ -105,18 +72,6 @@ export interface RequestTemplate {
 // Express Types
 export interface TypedRequest<T = Record<string, any>> extends Request {
   body: T;
-}
-
-// Component Props Types
-export interface LayoutProps {
-  children?: React.ReactNode;
-  title?: string;
-}
-
-export interface ServicesTreeProps {
-  services: AWSServices;
-  selectedService?: string;
-  selectedOperation?: string;
 }
 
 export interface ApiRequestFormProps {

@@ -1,165 +1,103 @@
-import { AWSServices, RequestTemplate, FieldDefinition } from '../types';
+import * as fs from 'fs/promises';
+import { RequestTemplate, FieldDefinition } from '../types';
+import { AWSOperation, AWSResource, AWSResourceHaver, AWSService, AWSServiceList } from '../types/model';
+import path from 'path';
 
-// AWS Services data structure with common operations
-export const AWS_SERVICES: AWSServices = {
-  'Compute': {
-    'EC2': {
-      name: 'EC2',
-      operations: [
-        'DescribeInstances',
-        'RunInstances',
-        'TerminateInstances',
-        'StartInstances',
-        'StopInstances',
-        'DescribeImages',
-        'CreateSecurityGroup',
-        'DescribeSecurityGroups'
-      ]
-    },
-    'Lambda': {
-      name: 'Lambda',
-      operations: [
-        'ListFunctions',
-        'CreateFunction',
-        'DeleteFunction',
-        'InvokeFunction',
-        'UpdateFunctionCode',
-        'GetFunction'
-      ]
-    },
-    'ECS': {
-      name: 'ECS',
-      operations: [
-        'ListClusters',
-        'CreateCluster',
-        'DeleteCluster',
-        'ListServices',
-        'CreateService',
-        'UpdateService'
-      ]
-    }
-  },
-  'Storage': {
-    'S3': {
-      name: 'S3',
-      operations: [
-        'ListBuckets',
-        'CreateBucket',
-        'DeleteBucket',
-        'GetObject',
-        'PutObject',
-        'DeleteObject',
-        'ListObjects'
-      ]
-    },
-    'EBS': {
-      name: 'EBS',
-      operations: [
-        'DescribeVolumes',
-        'CreateVolume',
-        'DeleteVolume',
-        'AttachVolume',
-        'DetachVolume'
-      ]
-    }
-  },
-  'Database': {
-    'RDS': {
-      name: 'RDS',
-      operations: [
-        'DescribeDBInstances',
-        'CreateDBInstance',
-        'DeleteDBInstance',
-        'ModifyDBInstance',
-        'RebootDBInstance'
-      ]
-    },
-    'DynamoDB': {
-      name: 'DynamoDB',
-      operations: [
-        'ListTables',
-        'CreateTable',
-        'DeleteTable',
-        'GetItem',
-        'PutItem',
-        'UpdateItem',
-        'DeleteItem',
-        'Scan',
-        'Query'
-      ]
-    }
-  },
-  'Networking': {
-    'VPC': {
-      name: 'VPC',
-      operations: [
-        'DescribeVpcs',
-        'CreateVpc',
-        'DeleteVpc',
-        'DescribeSubnets',
-        'CreateSubnet',
-        'DeleteSubnet'
-      ]
-    },
-    'CloudFront': {
-      name: 'CloudFront',
-      operations: [
-        'ListDistributions',
-        'CreateDistribution',
-        'GetDistribution',
-        'UpdateDistribution',
-        'DeleteDistribution'
-      ]
-    }
-  },
-  'Security': {
-    'IAM': {
-      name: 'IAM',
-      operations: [
-        'ListUsers',
-        'CreateUser',
-        'DeleteUser',
-        'ListRoles',
-        'CreateRole',
-        'DeleteRole',
-        'ListPolicies',
-        'CreatePolicy'
-      ]
-    },
-    'KMS': {
-      name: 'KMS',
-      operations: [
-        'ListKeys',
-        'CreateKey',
-        'DescribeKey',
-        'Encrypt',
-        'Decrypt',
-        'GenerateDataKey'
-      ]
-    }
-  },
-  'Monitoring': {
-    'CloudWatch': {
-      name: 'CloudWatch',
-      operations: [
-        'ListMetrics',
-        'GetMetricStatistics',
-        'PutMetricData',
-        'DescribeAlarms',
-        'PutMetricAlarm'
-      ]
-    },
-    'CloudTrail': {
-      name: 'CloudTrail',
-      operations: [
-        'DescribeTrails',
-        'CreateTrail',
-        'DeleteTrail',
-        'LookupEvents'
-      ]
+
+export class AwsServiceModelView {
+  public static async fromBuiltinModel(): Promise<AwsServiceModelView> {
+    const services = await JSON.parse(await fs.readFile(path.join(__dirname, '../data/aws-services.json'), 'utf-8'));
+    return new AwsServiceModelView(services as AWSServiceList);
+  }
+
+  private readonly expanded = new Set<string>();
+  public readonly services: AWSService[];
+  private readonly nodeIdMap = new Map<string, AWSResourceHaver>();
+
+  constructor(services: AWSServiceList) {
+    this.services = services.services;
+
+    this.indexNodeIds();
+  }
+
+  public toggleExpanded(resourceHaver: AWSResourceHaver | string): void {
+    const nodeId = typeof resourceHaver === 'string' ? resourceHaver : resourceHaver.nodeId;
+
+    if (this.expanded.has(nodeId)) {
+      this.expanded.delete(nodeId);
+    } else {
+      this.expanded.add(nodeId);
     }
   }
-};
+
+  public getNodeById(node: string) {
+    const ret = this.nodeIdMap.get(node);
+    if (!ret) {
+      throw new Error(`Node with ID ${node} not found in AWS service model`);
+    }
+    return ret;
+  }
+
+  public isExpanded(resourceHaver: AWSResourceHaver): boolean {
+    return this.expanded.has(resourceHaver.nodeId);
+  }
+
+  public filtered(searchTerm: string): AWSServiceList {
+    return {
+      services: this.services
+        .map(service => {
+          if (matches(searchTerm, service.name) || matches(searchTerm, service.shortName)) {
+            return service;
+          }
+
+          return {
+            ...service,
+            operations: service.operations
+              .filter(matchingOperation),
+            resources: service.resources
+              .map(filterResourceMembers)
+              .filter(hasMembers),
+          };
+        })
+        .filter(hasMembers),
+    };
+
+    function matchingOperation(op: AWSOperation): boolean {
+      return matches(searchTerm, op.name) || matches(searchTerm, op.description || '');
+    }
+
+    function filterResourceMembers(resource: AWSResource): AWSResource {
+      return {
+        ...resource,
+        operations: resource.operations.filter(matchingOperation),
+        resources: resource.resources.map(filterResourceMembers)
+      };
+    }
+  }
+
+  private indexNodeIds() {
+    const self = this;
+    for (const service of this.services) {
+      recurse(service);
+    }
+
+    function recurse(resourceHaver: AWSResourceHaver) {
+      self.nodeIdMap.set(resourceHaver.nodeId, resourceHaver);
+
+      for (const resource of resourceHaver.resources) {
+        recurse(resource);
+      }
+    }
+  }
+}
+
+function hasMembers(x: AWSResource | AWSService): boolean {
+  return x.operations.length > 0 || x.resources.length > 0;
+}
+
+function matches(needle: string, haystack: string): boolean {
+  return haystack.toLowerCase().includes(needle.toLowerCase());
+}
 
 interface TemplateDefinition {
   required: Record<string, unknown>;
@@ -196,7 +134,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
         SubnetId: "subnet-12345678"
       }
     },
-    
+
     // S3 Templates
     'S3.ListBuckets': {
       required: {},
@@ -221,7 +159,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
         Range: "bytes=0-1023"
       }
     },
-    
+
     // Lambda Templates
     'Lambda.ListFunctions': {
       required: {},
@@ -245,7 +183,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
         MemorySize: 128
       }
     },
-    
+
     // DynamoDB Templates
     'DynamoDB.ListTables': {
       required: {},
@@ -266,7 +204,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
         ConsistentRead: true
       }
     },
-    
+
     // IAM Templates
     'IAM.ListUsers': {
       required: {},
@@ -289,7 +227,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
       }
     }
   };
-  
+
   const key = `${service}.${operation}`;
   const template = templates[key] || {
     required: {},
@@ -301,7 +239,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
 
   // Generate field definitions
   const fields: Record<string, FieldDefinition> = {};
-  
+
   Object.keys(template.required).forEach(field => {
     fields[field] = {
       type: inferType(template.required[field]),
@@ -309,7 +247,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
       example: template.required[field]
     };
   });
-  
+
   Object.keys(template.optional).forEach(field => {
     fields[field] = {
       type: inferType(template.optional[field]),
@@ -346,11 +284,11 @@ export function generateRequestPayload(service: string, operation: string): Reco
 export function getFieldMetadata(service: string, operation: string): Record<string, { required: boolean }> {
   const template = getRequestTemplate(service, operation);
   const metadata: Record<string, { required: boolean }> = {};
-  
+
   Object.keys(template.fields).forEach(field => {
     metadata[field] = { required: template.fields[field]?.required || false };
   });
-  
+
   return metadata;
 }
 
@@ -358,53 +296,4 @@ interface ServiceInfo {
   category: string;
   service: string;
   operations: string[];
-}
-
-// Get all services in a flat structure for filtering
-export function getAllServices(): ServiceInfo[] {
-  const services: ServiceInfo[] = [];
-  Object.keys(AWS_SERVICES).forEach(category => {
-    Object.keys(AWS_SERVICES[category]).forEach(service => {
-      const serviceData = AWS_SERVICES[category]?.[service];
-      if (serviceData) {
-        services.push({
-          category,
-          service,
-          operations: serviceData.operations
-        });
-      }
-    });
-  });
-  return services;
-}
-
-// Filter services based on search term
-export function filterServices(searchTerm: string): AWSServices {
-  if (!searchTerm) return AWS_SERVICES;
-  
-  const filtered: AWSServices = {};
-  const term = searchTerm.toLowerCase();
-  
-  Object.keys(AWS_SERVICES).forEach(category => {
-    const categoryServices: typeof AWS_SERVICES[string] = {};
-    let hasMatches = false;
-    
-    Object.keys(AWS_SERVICES[category] || {}).forEach(service => {
-      const serviceData = AWS_SERVICES[category]?.[service];
-      if (serviceData && (
-        service.toLowerCase().includes(term) || 
-        category.toLowerCase().includes(term) ||
-        serviceData.operations.some(op => op.toLowerCase().includes(term))
-      )) {
-        categoryServices[service] = serviceData;
-        hasMatches = true;
-      }
-    });
-    
-    if (hasMatches) {
-      filtered[category] = categoryServices;
-    }
-  });
-  
-  return filtered;
 }

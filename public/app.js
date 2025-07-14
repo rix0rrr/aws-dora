@@ -23,7 +23,7 @@ function initializeSyntaxHighlighting() {
 function initializeJsonEditor() {
   const editor = document.getElementById('json-editor');
   if (!editor) return;
-  
+
   // Add line numbers and better formatting
   editor.addEventListener('input', function() {
     try {
@@ -40,7 +40,7 @@ function initializeJsonEditor() {
       editor.classList.add('border-red-500', 'bg-red-50');
     }
   });
-  
+
   // Auto-format JSON on blur
   editor.addEventListener('blur', function() {
     try {
@@ -56,7 +56,7 @@ function initializeJsonEditor() {
       // Invalid JSON - don't format
     }
   });
-  
+
   // Add keyboard shortcuts
   editor.addEventListener('keydown', function(e) {
     // Ctrl/Cmd + Enter to execute
@@ -66,7 +66,7 @@ function initializeJsonEditor() {
         executeButton.click();
       }
     }
-    
+
     // Tab for indentation
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -87,9 +87,9 @@ function showNotification(message, type = 'info') {
     'bg-blue-500 text-white'
   }`;
   notification.textContent = message;
-  
+
   document.body.appendChild(notification);
-  
+
   // Auto-remove after 3 seconds
   setTimeout(() => {
     notification.remove();

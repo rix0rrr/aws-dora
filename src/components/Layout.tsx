@@ -1,7 +1,10 @@
 import React from 'react';
-import { LayoutProps } from '../types';
+import { ServicesTree } from './ServicesTree';
+import { AWSServiceList } from '../types/model';
 
-interface ExtendedLayoutProps extends LayoutProps {
+interface ExtendedLayoutProps {
+  serviceTree: React.ReactElement;
+  title?: string;
   treeContent?: string;
   filterContent?: string;
   requestFormContent?: string;
@@ -9,37 +12,36 @@ interface ExtendedLayoutProps extends LayoutProps {
   loggerContent?: string;
 }
 
-function Layout({ 
-  children, 
-  title = 'AWS API Explorer', 
-  treeContent = '', 
-  filterContent = '', 
-  requestFormContent = '', 
-  credentialsContent = '', 
-  loggerContent = '' 
+function Layout({
+  serviceTree,
+  title = 'AWS API Explorer',
+  treeContent = '',
+  requestFormContent = '',
+  credentialsContent = '',
+  loggerContent = ''
 }: ExtendedLayoutProps): React.ReactElement {
   return React.createElement('html', { lang: 'en' }, [
     React.createElement('head', { key: 'head' }, [
       React.createElement('meta', { key: 'charset', charSet: 'UTF-8' }),
-      React.createElement('meta', { 
-        key: 'viewport', 
-        name: 'viewport', 
-        content: 'width=device-width, initial-scale=1.0' 
+      React.createElement('meta', {
+        key: 'viewport',
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1.0'
       }),
       React.createElement('title', { key: 'title' }, title),
-      
+
       // HTMX
-      React.createElement('script', { 
+      React.createElement('script', {
         key: 'htmx',
-        src: 'https://unpkg.com/htmx.org@1.9.10' 
+        src: 'https://unpkg.com/htmx.org@1.9.10'
       }),
-      
+
       // Tailwind CSS
-      React.createElement('script', { 
+      React.createElement('script', {
         key: 'tailwind',
-        src: 'https://cdn.tailwindcss.com' 
+        src: 'https://cdn.tailwindcss.com'
       }),
-      
+
       // Prism.js for syntax highlighting
       React.createElement('link', {
         key: 'prism-css',
@@ -54,13 +56,13 @@ function Layout({
         key: 'prism-json',
         src: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js'
       }),
-      
+
       // Custom JavaScript
       React.createElement('script', {
         key: 'custom-js',
         src: '/app.js'
       }),
-      
+
       // Custom styles
       React.createElement('style', { key: 'custom-styles' }, `
         .required-field { border-left: 4px solid #ef4444; }
@@ -68,18 +70,18 @@ function Layout({
         .tree-item { cursor: pointer; transition: background-color 0.2s; }
         .tree-item:hover { background-color: #f3f4f6; }
         .loading { opacity: 0.6; pointer-events: none; }
-        
+
         /* Scrollbar styling */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-        
+
         /* HTMX loading indicators */
         .htmx-indicator { opacity: 0; transition: opacity 0.3s; }
         .htmx-request .htmx-indicator { opacity: 1; }
         .htmx-request.htmx-indicator { opacity: 1; }
-        
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
           .flex-container { flex-direction: column; }
@@ -88,9 +90,9 @@ function Layout({
         }
       `)
     ]),
-    
+
     React.createElement('body', { key: 'body', className: 'bg-gray-50 min-h-screen' }, [
-      React.createElement('div', { 
+      React.createElement('div', {
         key: 'container',
         className: 'flex h-screen flex-container'
       }, [
@@ -110,8 +112,7 @@ function Layout({
             React.createElement('div', {
               key: 'filter',
               id: 'filter-section',
-              dangerouslySetInnerHTML: { __html: filterContent }
-            }),
+            }, serviceTree),
           ]),
           React.createElement('div', {
             key: 'tree-container',
@@ -120,7 +121,7 @@ function Layout({
             dangerouslySetInnerHTML: { __html: treeContent }
           })
         ]),
-        
+
         // Main content
         React.createElement('div', {
           key: 'main',
@@ -144,7 +145,7 @@ function Layout({
               dangerouslySetInnerHTML: { __html: requestFormContent }
             })
           ]),
-          
+
           // Response/Log section
           React.createElement('div', {
             key: 'response-section',
@@ -154,22 +155,6 @@ function Layout({
           })
         ])
       ]),
-      
-      // Initialize Prism highlighting after HTMX updates
-      React.createElement('script', { key: 'init-script' }, `
-        document.addEventListener('htmx:afterSwap', function() {
-          if (typeof Prism !== 'undefined') {
-            Prism.highlightAll();
-          }
-        });
-        
-        // Initial highlighting
-        document.addEventListener('DOMContentLoaded', function() {
-          if (typeof Prism !== 'undefined') {
-            Prism.highlightAll();
-          }
-        });
-      `)
     ])
   ]);
 }

@@ -3,13 +3,9 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { getLogEntries, clearLog, getLogStats, filterLogEntries } from '../services/requestLogger';
 import { RequestLogger, EmptyRequestLogger } from '../components/RequestLogger';
+import { renderJSX } from '../util/jsx';
 
 const router = express.Router();
-
-// Helper function to render JSX
-function renderJSX(component: React.ComponentType<Record<string, unknown>>, props: Record<string, unknown> = {}): string {
-  return renderToString(React.createElement(component, props));
-}
 
 interface LogQueryParams {
   limit?: string;
@@ -23,7 +19,7 @@ interface LogQueryParams {
 router.get('/', (req: Request<{}, {}, {}, LogQueryParams>, res: Response): void => {
   try {
     const { limit, service, success, credentialType, operation } = req.query;
-    
+
     let logEntries;
     if (service || success !== undefined || credentialType || operation) {
       // Apply filters
@@ -34,23 +30,23 @@ router.get('/', (req: Request<{}, {}, {}, LogQueryParams>, res: Response): void 
         operation?: string;
         limit?: number;
       } = {};
-      
+
       if (service) filters.service = service;
       if (success !== undefined) filters.success = success === 'true';
       if (credentialType) filters.credentialType = credentialType;
       if (operation) filters.operation = operation;
       if (limit) filters.limit = parseInt(limit, 10);
-      
+
       logEntries = filterLogEntries(filters);
     } else {
       const limitNum = limit ? parseInt(limit, 10) : 50;
       logEntries = getLogEntries(limitNum);
     }
-    
+
     const stats = getLogStats();
-    
-    const html = renderJSX(RequestLogger, { 
-      logEntries, 
+
+    const html = renderJSX(RequestLogger, {
+      logEntries,
       stats: {
         total: stats.total,
         successful: stats.successful,

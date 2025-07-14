@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { isService, Operation, Resource, ResourceHaver, Service, Shape, SmithyModel, Structure, ShapeRef, Value, assertType, assertValue, Unit, builtinShape } from '../src/types/smithy';
-import { AWSOperation, AWSOperationNode, AWSResource, AWSService, AWSServiceList } from '../src/types/index';
+import { AWSOperation, AWSResourceHaver, AWSResource, AWSService, AWSServiceList } from '../src/types/model';
 import { assert } from 'console';
 
 async function main() {
@@ -39,23 +39,24 @@ function parseService(id: string, smithyService: Service, model: SmithyModel): A
   return {
     name,
     shortName,
-    ...parseResourceHaver(id, smithyService, model),
+    ...parseResourceHaver(id, smithyService, model, shortName, shortName),
   };
 }
 
-function parseResource(id: string, resource: Resource, model: SmithyModel): AWSResource {
-  const rs = parseResourceHaver(id, resource, model);
+function parseResource(id: string, resource: Resource, model: SmithyModel, serviceId: string, parentNodeId: string): AWSResource {
+  const rs = parseResourceHaver(id, resource, model, serviceId, parentNodeId);
   const crud = [resource.create, resource.put, resource.read, resource.update, resource.list]
-    .flatMap((x) => x ? [parseOperation(x.target, assertType('operation', shape(x, model)), model)] : []);
+    .flatMap((x) => x ? [parseOperation(x.target, assertType('operation', shape(x, model)), model, serviceId)] : []);
 
   return {
     name: localId(id),
+    nodeId: `${parentNodeId}.${localId(id)}`,
     operations: sortByName(rs.operations.concat(crud)),
     resources: rs.resources,
   };
 }
 
-function parseOperation(id: string, operation: Operation, model: SmithyModel): AWSOperation {
+function parseOperation(id: string, operation: Operation, model: SmithyModel, serviceId: string): AWSOperation {
   const inputShape = shape(operation.input, model);
   if (inputShape.type !== 'structure' && inputShape.type !== 'unit') {
     throw new Error(`Operation ${id} input must be a structure or unit, got ${inputShape.type}`);
@@ -63,6 +64,7 @@ function parseOperation(id: string, operation: Operation, model: SmithyModel): A
 
   return {
     name: localId(id),
+    operationId: `${serviceId}.${localId(id)}`,
     description: operation.traits?.['aws.api#documentation'],
     requestTemplate: exampleValue(localId(operation.input.target), inputShape, model),
   };
@@ -124,10 +126,11 @@ function exampleValue(key: string, x: Value, model: SmithyModel): unknown {
   }
 }
 
-function parseResourceHaver(id: string, haver: ResourceHaver, model: SmithyModel): AWSOperationNode {
+function parseResourceHaver(id: string, haver: ResourceHaver, model: SmithyModel, serviceId: string, parentNodeId: string): AWSResourceHaver {
   return {
-    resources: sortByName((haver.resources ?? []).map((r) => parseResource(r.target, assertType('resource', shape(r, model)), model))),
-    operations: sortByName((haver.operations ?? []).map((op) => parseOperation(op.target, assertType('operation', shape(op, model)), model))),
+    nodeId: `${parentNodeId}.${localId(id)}`,
+    resources: sortByName((haver.resources ?? []).map((r) => parseResource(r.target, assertType('resource', shape(r, model)), model, serviceId, parentNodeId))),
+    operations: sortByName((haver.operations ?? []).map((op) => parseOperation(op.target, assertType('operation', shape(op, model)), model, serviceId))),
   };
 }
 

@@ -12,7 +12,7 @@ export async function detectCredentialSources(): Promise<CredentialSource[]> {
     credentials.push({
       type: 'environment',
       name: 'Environment Variables',
-      region: process.env.AWS_DEFAULT_REGION || process.env.AWS_REGION || 'us-east-1'
+      region: process.env.AWS_DEFAULT_REGION ?? process.env.AWS_REGION,
     });
   }
 
@@ -23,7 +23,7 @@ export async function detectCredentialSources(): Promise<CredentialSource[]> {
     credentials.push({
       type: 'ec2-instance',
       name: 'EC2 Instance Role',
-      region: process.env.AWS_DEFAULT_REGION || 'us-east-1'
+      region: process.env.AWS_DEFAULT_REGION ?? 'us-east-1',
     });
   } catch (error) {
     // EC2 role not available
