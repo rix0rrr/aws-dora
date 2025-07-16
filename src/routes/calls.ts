@@ -1,11 +1,10 @@
 import express, { Request, Response } from 'express';
-import React from 'react';
-import { renderToString } from 'react-dom/server';
-import { AwsServiceModelView, generateRequestPayload, getFieldMetadata } from '../services/aws-service-model-view';
+import { AwsServiceModelView } from '../services/aws-service-model-view';
 import { ApiRequestForm } from '../components/ApiRequestForm';
 import { renderJSX } from '../util/jsx';
+import { ErrorResponseBox, ResponseBox } from '../components/ResponseBox';
 
-function makeApitemplateRouter(serviceModel: AwsServiceModelView) {
+function makeCallRouter(serviceModel: AwsServiceModelView) {
   const router = express.Router();
 
   // Get API template for a specific service and operation
@@ -36,7 +35,35 @@ function makeApitemplateRouter(serviceModel: AwsServiceModelView) {
     res.send(html);
   });
 
+  // Get API template for a specific service and operation
+  router.post('/:operationId', (req: Request, res: Response): void => {
+    try {
+      const { operationId } = req.params;
+      console.log(req.body);
+      const { credentials, request } = req.body;
+      const op = serviceModel.getOperationById(operationId ?? '');
+
+      if (!credentials) {
+        throw new Error('Select a credential source');
+      }
+      if (!request) {
+        throw new Error('No request found');
+      }
+      if (!op) {
+        throw new Error(`No such operation: ${operationId}`);
+      }
+
+      // Render the API request form
+      res.send(renderJSX(ResponseBox({
+      })));
+    } catch (e: any) {
+      res.send(renderJSX(ErrorResponseBox({
+        errorMessage: e.message,
+      })));
+    }
+  });
+
   return router;
 }
 
-export default makeApitemplateRouter;
+export default makeCallRouter;

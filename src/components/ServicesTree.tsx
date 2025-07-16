@@ -79,7 +79,7 @@ function renderOperation(op: AWSOperation): React.ReactElement {
   return <div
     key={op.operationId}
     className="tree-item p-2 text-sm text-gray-900 rounded cursor-pointer hover:bg-blue-50 hover:text-blue-700 whitespace-nowrap overflow-hidden"
-    hx-get={`/api-template/${op.operationId}`}
+    hx-get={`/call/${op.operationId}`}
     hx-target="#request-form"
     title={op.name}
   >{op.name}</div>;

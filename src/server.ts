@@ -2,20 +2,20 @@ import express, { Request, Response, NextFunction, Application } from 'express';
 
 import { AppConfig, CredentialSource } from './types';
 import Layout from './components/Layout';
-import { ServicesTree } from './components/ServicesTree';
 import { EmptyRequestForm } from './components/ApiRequestForm';
 import { CredentialsSelector, EmptyCredentialsSelector } from './components/CredentialsSelector';
-import { EmptyRequestLogger } from './components/RequestLogger';
+import { EmptyRequestLogger } from './components/Log';
 import { detectCredentialSources } from './services/credentialsManager';
 
 // Import routes
 import makeTreeRouter from './routes/tree';
-import makeApiTemplateRouter from './routes/api-template';
+import makeApiTemplateRouter from './routes/calls';
 import credentialsRouter from './routes/credentials';
 import executeRouter from './routes/execute';
 import logsRouter from './routes/logs';
 import { renderJSX } from './util/jsx';
 import { AwsServiceModelView } from './services/aws-service-model-view';
+import { EmptyResponseBox } from './components/ResponseBox';
 
 async function startup() {
   const serviceModel = await AwsServiceModelView.fromBuiltinModel();
@@ -55,7 +55,7 @@ async function startup() {
 
   // Use routes
   app.use('/tree', makeTreeRouter(serviceModel));
-  app.use('/api-template', makeApiTemplateRouter(serviceModel));
+  app.use('/call', makeApiTemplateRouter(serviceModel));
   app.use('/credentials', credentialsRouter);
   app.use('/execute', executeRouter);
   app.use('/logs', logsRouter);
@@ -67,18 +67,17 @@ async function startup() {
       const credentials: CredentialSource[] = await detectCredentialSources();
 
       // Render the components
-      const requestFormHtml: string = renderJSX(EmptyRequestForm, {});
       const credentialsContent = credentials.length > 0
         ? CredentialsSelector({ credentials })
         : EmptyCredentialsSelector();
-      const loggerHtml: string = renderJSX(EmptyRequestLogger, {});
 
-      const html: string = '<!DOCTYPE html>' + renderJSX(Layout, {
+      const html: string = '<!DOCTYPE html>' + renderJSX(Layout({
         serviceModel,
-        requestFormContent: requestFormHtml,
+        requestForm: EmptyRequestForm(),
         credentialsContent,
-        loggerContent: loggerHtml
-      });
+        responseBox: EmptyResponseBox(),
+        requestLog: EmptyRequestLogger(),
+      }));
       res.send(html);
     } catch (error) {
       console.error('Error loading page:', error);

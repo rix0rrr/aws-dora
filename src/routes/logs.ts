@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { getLogEntries, clearLog, getLogStats, filterLogEntries } from '../services/requestLogger';
-import { RequestLogger, EmptyRequestLogger } from '../components/RequestLogger';
+import { RequestLog, EmptyRequestLogger } from '../components/Log';
 import { renderJSX } from '../util/jsx';
 
 const router = express.Router();
@@ -45,7 +45,7 @@ router.get('/', (req: Request<{}, {}, {}, LogQueryParams>, res: Response): void 
 
     const stats = getLogStats();
 
-    const html = renderJSX(RequestLogger, {
+    const html = renderJSX(RequestLog, {
       logEntries,
       stats: {
         total: stats.total,

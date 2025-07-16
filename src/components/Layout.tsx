@@ -7,20 +7,20 @@ import { FilterBar } from './FilterBar';
 interface ExtendedLayoutProps {
   serviceModel: AwsServiceModelView;
   title?: string;
-  treeContent?: string;
   filterContent?: string;
-  requestFormContent?: string;
+  requestForm: React.ReactElement;
+  responseBox: React.ReactElement;
   credentialsContent: React.ReactElement;
-  loggerContent?: string;
+  requestLog: React.ReactElement;
 }
 
 function Layout({
   serviceModel,
   title = 'AWS API Explorer',
-  treeContent = '',
-  requestFormContent = '',
+  requestForm,
+  responseBox,
   credentialsContent,
-  loggerContent = ''
+  requestLog,
 }: ExtendedLayoutProps): React.ReactElement {
   return (
     <html lang="en">
@@ -85,7 +85,7 @@ function Layout({
             <div id="credentials-section">{credentialsContent}</div>
           </div>
           <div className="w-screen flex flex-1 overflow-hidden">
-            {/* Left sidebar */}
+            {/* Left sidebar (tree) */}
             <div className="w-full md:w-1/4 bg-white border-r border-gray-200 flex flex-col">
               <div className="p-4 border-b border-gray-200">
                 <div>
@@ -109,16 +109,14 @@ function Layout({
                 <div
                   id="request-form"
                   className="h-full"
-                  dangerouslySetInnerHTML={{ __html: requestFormContent }}
-                />
+                >{requestForm}</div>
               </div>
 
               {/* Response/Log section */}
               <div
-                className="h-1/3 bg-gray-50"
-                id="response-log"
-                dangerouslySetInnerHTML={{ __html: loggerContent }}
-              />
+                className="h-1/3 bg-gray-50 p-4"
+                id="response"
+              >{responseBox}</div>
             </div>
 
             {/* Divider */}
@@ -126,9 +124,9 @@ function Layout({
               <i className="text-gray-400 fa-solid fa-grip-lines-vertical self-center"></i>
             </div>
 
-            {/* Right sidebar */}
+            {/* Right sidebar (logs) */}
             <div className="w-full md:w-1/4 bg-white border-l border-gray-200 flex flex-col">
-              Right bar
+              {requestLog}
             </div>
           </div>
         </div>
