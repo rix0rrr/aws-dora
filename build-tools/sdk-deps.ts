@@ -14,14 +14,15 @@ async function main() {
       encoding: 'utf-8',
     });
     const packages = JSON.parse(output) as Array<{ name: string, version: string }>;
+    const interesting = packages.filter(pkg => pkg.name.startsWith(prefix));
 
     const pj = JSON.parse(await fs.readFile('package.json', 'utf-8'));
-    for (const pkg of packages) {
-      if (pkg.name.startsWith(prefix)) {
-        pj.dependencies[pkg.name] = `${pkg.version}`;
-        count += 1;
-      }
+    for (const pkg of interesting) {
+      pj.dependencies[pkg.name] = `${pkg.version}`;
     }
+    count += interesting.length;
+    console.log(`${interesting.length}: ${interesting.map(i => i.name).join(', ')}`);
+
     await fs.writeFile('package.json', JSON.stringify(pj, null, 2), 'utf-8');
 
     from += 20;
