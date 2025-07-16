@@ -8,14 +8,13 @@ interface ServicesTreeProps {
 
 export function ServicesTree({ serviceModel }: ServicesTreeProps): React.ReactElement {
   // Tree
-  return React.createElement('div', { className: 'space-y-2' },
-    serviceModel.filtered().map(service => ServicesTreeService({
+  return <div>
+    {serviceModel.filtered().map(service => ServicesTreeService({
       service,
       serviceModel,
-    })),
-  );
+    }))}
+  </div>
 }
-
 
 interface ServersTreeServiceProps {
   service: AWSService;
@@ -25,15 +24,17 @@ interface ServersTreeServiceProps {
 export function ServicesTreeService({ service, serviceModel }: ServersTreeServiceProps): React.ReactElement {
   const expanded = serviceModel.isExpanded(service);
 
+  const chevron = expanded ? 'fa-solid fa-circle-chevron-down' : 'fa-solid fa-circle-chevron-right';
+
   return <div key={service.shortName} className="expando">
     <h3
       key="header"
-      className="p-2 text-md font-light text-gray-600 bg-yellow-100 hover:bg-blue-50 hover:text-blue-700 cursor-pointer tracking-wide pointer whitespace-nowrap overflow-hidden"
+      className="p-2 text-md font-light text-gray-600 hover:bg-blue-50 hover:text-blue-700 cursor-pointer tracking-wide pointer whitespace-nowrap overflow-hidden"
       hx-post={`/tree/toggle/${service.nodeId}`}
       hx-target="closest .expando"
       hx-swap="outerHTML"
       title={service.name}
-    >{service.name}</h3>
+    ><span className={`${chevron} text-orange-300 mr-2`}></span> {service.name}</h3>
 
     {expanded
       ? <div className="ml-4">
@@ -55,15 +56,15 @@ export function ServicesTreeResource({ resource, serviceModel }: ServicesTreeRes
 
   const chevron = expanded ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right';
 
-  return <div key={resource.name} className="expando space-y-1">
+  return <div key={resource.name} className="expando">
     <div
       key="resource-header"
-      className="border rounded-md border-gray-300 p-2 text-sm font-semibold text-gray-500 hover:bg-blue-50 hover:text-blue-700 uppercase cursor-pointer tracking-wide mb-2 whitespace-nowrap overflow-hidden"
+      className="border rounded-md border-blue-200 my-2 p-2 text-sm font-semibold text-orange-400 hover:bg-blue-50 hover:text-blue-700 uppercase cursor-pointer tracking-wide whitespace-nowrap overflow-hidden"
       hx-post={`/tree/toggle/${resource.nodeId}`}
       hx-target="closest .expando"
       hx-swap="outerHTML"
       title={resource.name}
-    ><span className={chevron}></span> {resource.name}</div>
+    ><span className={`${chevron} text-orange-300 mr-2`}></span> {resource.name}</div>
 
     {expanded
       ? <div className="ml-4">

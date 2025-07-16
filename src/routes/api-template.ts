@@ -1,49 +1,42 @@
 import express, { Request, Response } from 'express';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { generateRequestPayload, getFieldMetadata } from '../services/aws-service-model-view';
+import { AwsServiceModelView, generateRequestPayload, getFieldMetadata } from '../services/aws-service-model-view';
 import { ApiRequestForm } from '../components/ApiRequestForm';
 import { renderJSX } from '../util/jsx';
 
-const router = express.Router();
+function makeApitemplateRouter(serviceModel: AwsServiceModelView) {
+  const router = express.Router();
 
-// Get API template for a specific service and operation
-router.get('/:service/:operation', (req: Request, res: Response): void => {
-  const { service, operation } = req.params;
+  // Get API template for a specific service and operation
+  router.get('/:operationId', (req: Request, res: Response): void => {
+    const { operationId } = req.params;
 
-  if (!service || !operation) {
-    res.status(400).send(`
-      <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <h3 class="text-red-800 font-medium">Invalid Request</h3>
-        <p class="text-red-600 text-sm mt-1">Service and operation parameters are required</p>
-      </div>
-    `);
-    return;
-  }
+    const op = serviceModel.getOperationById(operationId ?? '');
+    if (!op) {
+      res.status(400).send(`
+        <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <h3 class="text-red-800 font-medium">Invalid Request</h3>
+          <p class="text-red-600 text-sm mt-1">No such operation: ${JSON.stringify(operationId)}</p>
+        </div>
+      `);
+      return;
+    }
 
-  try {
-    // Generate the request payload
-    const requestPayload = generateRequestPayload(service, operation);
-    const fieldMetadata = getFieldMetadata(service, operation);
+    const requestTemplate = JSON.stringify(op.operation.requestTemplate ?? {}, undefined, 2);
 
     // Render the API request form
-    const html = renderJSX(ApiRequestForm, {
-      service,
-      operation,
-      requestPayload,
-      fieldMetadata
-    });
+    const html = renderJSX(ApiRequestForm({
+      serviceName: op.service.name,
+      operation: op.operation.name,
+      operationId: op.operation.operationId,
+      requestTemplate,
+    }));
 
     res.send(html);
-  } catch (error) {
-    console.error('Error generating API template:', error);
-    res.status(500).send(`
-      <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <h3 class="text-red-800 font-medium">Error Loading Template</h3>
-        <p class="text-red-600 text-sm mt-1">Could not generate template for ${service}.${operation}</p>
-      </div>
-    `);
-  }
-});
+  });
 
-export default router;
+  return router;
+}
+
+export default makeApitemplateRouter;

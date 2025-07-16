@@ -10,7 +10,7 @@ import { detectCredentialSources } from './services/credentialsManager';
 
 // Import routes
 import makeTreeRouter from './routes/tree';
-import apiTemplateRouter from './routes/api-template';
+import makeApiTemplateRouter from './routes/api-template';
 import credentialsRouter from './routes/credentials';
 import executeRouter from './routes/execute';
 import logsRouter from './routes/logs';
@@ -21,7 +21,7 @@ async function startup() {
   const serviceModel = await AwsServiceModelView.fromBuiltinModel();
 
   const app: Application = express();
-  const PORT: number = parseInt(process.env.PORT || '3000', 10);
+  const PORT: number = parseInt(process.env.PORT || '12319', 10);
   const NODE_ENV: string = process.env.NODE_ENV || 'development';
 
   // Application configuration
@@ -55,7 +55,7 @@ async function startup() {
 
   // Use routes
   app.use('/tree', makeTreeRouter(serviceModel));
-  app.use('/api-template', apiTemplateRouter);
+  app.use('/api-template', makeApiTemplateRouter(serviceModel));
   app.use('/credentials', credentialsRouter);
   app.use('/execute', executeRouter);
   app.use('/logs', logsRouter);

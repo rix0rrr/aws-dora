@@ -11,7 +11,7 @@ function makeTreeRouter(serviceModel: AwsServiceModelView) {
     const { node } = req.params;
 
     serviceModel.toggleExpanded(node);
-    const rh = serviceModel.getNodeById(node);
+    const rh = serviceModel.getNodeById(node, 'filtered');
     if (!rh) {
       res.status(404).send(`Node with ID ${node} not found in AWS service model`);
       return;

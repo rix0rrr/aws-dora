@@ -36,10 +36,10 @@ export class AwsServiceModelView {
     }
   }
 
-  public getNodeById(node: string): AWSResourceHaver | undefined {
+  public getNodeById(node: string, source: 'filtered' | 'all'): AWSResourceHaver | undefined {
     const self = this;
     let ret: AWSResourceHaver | undefined;
-    for (const service of this.filtered()) {
+    for (const service of source === 'filtered' ? this.filtered() : this.services) {
       recurse(service);
     }
     return ret;
@@ -52,6 +52,28 @@ export class AwsServiceModelView {
 
       for (const resource of resourceHaver.resources) {
         recurse(resource);
+      }
+    }
+  }
+
+  public getOperationById(id: string): { service: AWSService; operation: AWSOperation } | undefined {
+    const self = this;
+    let ret: ReturnType<typeof this.getOperationById>;
+    for (const service of this.services) {
+      recurse(service, service);
+    }
+    return ret;
+
+    function recurse(service: AWSService, resourceHaver: AWSResourceHaver) {
+      for (const operation of resourceHaver.operations) {
+        if (operation.operationId === id) {
+          ret = { service, operation };
+          return;
+        }
+      }
+
+      for (const resource of resourceHaver.resources) {
+        recurse(service, resource);
       }
     }
   }
