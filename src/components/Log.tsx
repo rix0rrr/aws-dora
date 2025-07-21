@@ -49,10 +49,10 @@ function RenderLogEntry(entry: LogEntry): React.ReactElement {
   const timestamp = entry.timestamp.toISOString();
 
   return (
-    <div className="text-sm p-2">
+    <div className="text-sm p-2" key={timestamp}>
       {/* Header */}
       <h3 className="font-light text-orange-500 text-lg"
-        title={`${timestamp} ${entry.region} ${entry.credentials.type}`}
+        title={`${timestamp} · ${entry.service} · ${entry.region} · ${entry.credentials.name}`}
       >{entry.operation}</h3>
 
       {/* Content (collapsible) */}
@@ -70,7 +70,7 @@ function RenderLogEntry(entry: LogEntry): React.ReactElement {
         {/* Response/Error */}
         <div>
           <h5 className="text-sm font-medium text-gray-700 mb-2">Response</h5>
-          <pre className="text-2xs overflow-x-auto">
+          <pre className="text-2xs overflow-auto max-h-64">
             <code className="language-js">
               {entry.response}
             </code>
@@ -83,14 +83,14 @@ function RenderLogEntry(entry: LogEntry): React.ReactElement {
 
 function renderSeparator(entry: LogEntry, nextEntry: LogEntry): React.ReactElement {
   if (entry.region !== nextEntry.region) {
-    return <div className="relative flex items-center">
+    return <div className="relative flex items-center" key={`${entry.timestamp.toISOString()}-separator`}>
       <div className="flex-grow border-t border-gray-200"></div>
       <span className="bg-white border-gray-400 shadow rounded-full text-xs flex-shrink py-1 px-2 text-gray-600">{nextEntry.region}</span>
       <div className="flex-grow border-t border-gray-200"></div>
     </div>;
   }
 
-  return <div className="relative flex items-center">
+  return <div className="relative flex items-center" key={`${entry.timestamp.toISOString()}-separator`}>
     <div className="flex-grow border-t border-gray-200"></div>
   </div>;
 }

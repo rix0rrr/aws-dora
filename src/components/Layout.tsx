@@ -15,7 +15,7 @@ interface ExtendedLayoutProps {
 
 function Layout({
   serviceModel,
-  title = 'AWS API Explorer',
+  title = 'AWS Dora',
   requestForm,
   responseBox,
   credentialsContent,
@@ -80,7 +80,9 @@ function Layout({
         <div className="h-screen w-screen flex flex-col overflow-hidden">
           {/* Header */}
           <div className="w-screen px-4 py-2 border-b border-gray-200 flex justify-between items-center flex-none">
-            <h1 className="text-xl font-bold text-gray-800">AWS API Explorer</h1>
+            <img src="/icon.svg" alt="AWS Dora Logo" className="h-10 mr-4 flex-none" />
+            <h1 className="text-xl font-bold text-gray-800 flex-none">AWS Dora</h1>
+            <div className="flex-1">{/* Spacer */}</div>
             <div id="credentials-section">{credentialsContent}</div>
           </div>
           <div className="w-screen flex flex-1 overflow-hidden">

@@ -42,7 +42,6 @@ function makeCallRouter(serviceModel: AwsServiceModelView, requestLog: RequestLo
   router.post('/:operationId', async (req: Request, res: Response) => {
     try {
       const { operationId } = req.params;
-      console.log(req.body);
       const credentialsStr: string | undefined = req.body.credentials;
       const request: string | undefined = req.body.request;
       const region: string | undefined = req.body.region;
