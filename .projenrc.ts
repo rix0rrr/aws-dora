@@ -71,6 +71,10 @@ project.addTask('dev:watch', {
   exec: 'NODE_ENV=development nodemon --watch src --ext ts,tsx --exec tsx src/server.ts',
 });
 
-project.npmignore?.addPatterns('vendor/aws-sdk-js-v3/*');
+project.npmignore?.addPatterns(
+  'vendor/aws-sdk-js-v3/*',
+  '!lib/**/*.json',
+);
+
 
 project.synth();

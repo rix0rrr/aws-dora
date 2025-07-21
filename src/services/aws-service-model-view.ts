@@ -6,7 +6,7 @@ import { AWSOperation, AWSResource, AWSResourceHaver, AWSService, AWSServiceList
 
 export class AwsServiceModelView {
   public static async fromBuiltinModel(): Promise<AwsServiceModelView> {
-    const services = await JSON.parse(await fs.readFile(path.join(__dirname, '../data/aws-services.json'), 'utf-8'));
+    const services = await JSON.parse(await fs.readFile(path.join(__dirname, '../../data/aws-services.json'), 'utf-8'));
     return new AwsServiceModelView(services as AWSServiceList);
   }
 

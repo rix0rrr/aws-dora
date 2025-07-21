@@ -4,7 +4,7 @@ import { AWSOperation, AWSResourceHaver, AWSResource, AWSService, AWSServiceList
 import { isService, Operation, Resource, ResourceHaver, Service, Shape, SmithyModel, Structure, ShapeRef, Value, assertType, assertValue, Unit, builtinShape } from '../src/types/smithy';
 
 async function main() {
-  const outputFile = path.join(__dirname, '..', 'src', 'data', 'aws-services.json');
+  const outputFile = path.join(__dirname, '..', 'data', 'aws-services.json');
 
   const smithyFiles = await fs.readdir(path.join(__dirname, '../vendor/aws-sdk-js-v3/aws-models'), { withFileTypes: true });
 
