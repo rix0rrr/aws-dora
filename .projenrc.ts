@@ -28,7 +28,7 @@ const project = new typescript.TypeScriptAppProject({
   deps: [
     '@aws-sdk/credential-providers',
     '@aws-sdk/ec2-metadata-service',
-    '@aws-sdk/shared-ini-file-loader',
+    '@smithy/shared-ini-file-loader',
     '@smithy/node-http-handler',
     'aws-sdk-js-v3-all',
     'express',

@@ -96,11 +96,11 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/shared-ini-file-loader",
+      "name": "@smithy/node-http-handler",
       "type": "runtime"
     },
     {
-      "name": "@smithy/node-http-handler",
+      "name": "@smithy/shared-ini-file-loader",
       "type": "runtime"
     },
     {

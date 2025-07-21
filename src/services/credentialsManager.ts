@@ -1,5 +1,5 @@
 import { MetadataService } from '@aws-sdk/ec2-metadata-service';
-import { loadSharedConfigFiles } from '@aws-sdk/shared-ini-file-loader';
+import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader';
 import { CredentialSource } from '../types';
 
 export const ALL_REGIONS = [
