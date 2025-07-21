@@ -8,10 +8,6 @@ const project = new typescript.TypeScriptAppProject({
   defaultReleaseBranch: 'main',
   projenrcTs: true,
 
-  bin: {
-    'aws-dora': 'tsx src/server.ts',
-  },
-
   keywords: [
     'aws',
     'api',
@@ -37,6 +33,7 @@ const project = new typescript.TypeScriptAppProject({
     'react',
     'react-dom',
     'tsx',
+    'open',
   ],
   devDeps: [
     '@types/express',

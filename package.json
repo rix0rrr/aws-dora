@@ -6,7 +6,7 @@
     "url": "https://github.com/rix0rrr/aws-dora"
   },
   "bin": {
-    "aws-dora": "tsx src/server.ts"
+    "aws-dora": "bin/aws-dora"
   },
   "scripts": {
     "build": "npx projen build",
@@ -65,6 +65,7 @@
     "aws-sdk-js-v3-all": "^3",
     "express": "^5.1.0",
     "jsonc-parser": "^3.3.1",
+    "open": "^10.2.0",
     "proxy-agent": "^6.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

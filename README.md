@@ -15,7 +15,7 @@ $ npx aws-dora
 Or over an SSH tunnel
 
 ```sh
-$ ssh -L 12319:localhost:12319 user@remote-server npx aws-dora`
+$ ssh -L 12319:localhost:12319 user@remote-server npx aws-dora
 
 # Then open http://localhost:12319/
 ```

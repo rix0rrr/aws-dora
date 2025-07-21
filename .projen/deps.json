@@ -116,6 +116,10 @@
       "type": "runtime"
     },
     {
+      "name": "open",
+      "type": "runtime"
+    },
+    {
       "name": "proxy-agent",
       "type": "runtime"
     },

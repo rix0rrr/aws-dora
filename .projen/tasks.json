@@ -250,13 +250,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/express,@types/jest,@types/node,@types/react,@types/react-dom,eslint-import-resolver-typescript,eslint-plugin-import,jest,nodemon,projen,ts-jest,ts-node,typescript,@aws-sdk/credential-providers,@aws-sdk/ec2-metadata-service,@smithy/node-http-handler,@smithy/shared-ini-file-loader,aws-sdk-js-v3-all,express,jsonc-parser,proxy-agent,react,react-dom,tsx"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/express,@types/jest,@types/node,@types/react,@types/react-dom,eslint-import-resolver-typescript,eslint-plugin-import,jest,nodemon,projen,ts-jest,ts-node,typescript,@aws-sdk/credential-providers,@aws-sdk/ec2-metadata-service,@smithy/node-http-handler,@smithy/shared-ini-file-loader,aws-sdk-js-v3-all,express,jsonc-parser,open,proxy-agent,react,react-dom,tsx"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @stylistic/eslint-plugin @types/express @types/jest @types/node @types/react @types/react-dom @typescript-eslint/eslint-plugin @typescript-eslint/parser commit-and-tag-version constructs eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit nodemon projen ts-jest ts-node typescript @aws-sdk/credential-providers @aws-sdk/ec2-metadata-service @smithy/node-http-handler @smithy/shared-ini-file-loader aws-sdk-js-v3-all express jsonc-parser proxy-agent react react-dom tsx"
+          "exec": "yarn upgrade @stylistic/eslint-plugin @types/express @types/jest @types/node @types/react @types/react-dom @typescript-eslint/eslint-plugin @typescript-eslint/parser commit-and-tag-version constructs eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit nodemon projen ts-jest ts-node typescript @aws-sdk/credential-providers @aws-sdk/ec2-metadata-service @smithy/node-http-handler @smithy/shared-ini-file-loader aws-sdk-js-v3-all express jsonc-parser open proxy-agent react react-dom tsx"
         },
         {
           "exec": "npx projen"
