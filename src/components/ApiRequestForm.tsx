@@ -39,7 +39,8 @@ export function ApiRequestForm({ serviceName, operation, operationId, requestTem
           name="request"
           className="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 language-js"
           placeholder="JSON request payload will appear here..."
-        >{jsonString}</textarea>
+          defaultValue={jsonString}
+        ></textarea>
         {/* Syntax highlighting overlay (will be handled by Prism.js) */}
         <pre className="hidden">
           <code className="language-js" id="json-display">
