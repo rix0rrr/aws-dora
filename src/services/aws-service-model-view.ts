@@ -57,7 +57,6 @@ export class AwsServiceModelView {
   }
 
   public getOperationById(id: string): { service: AWSService; operation: AWSOperation } | undefined {
-    const self = this;
     let ret: ReturnType<typeof this.getOperationById>;
     for (const service of this.services) {
       recurse(service, service);

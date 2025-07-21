@@ -1,6 +1,5 @@
 import React from 'react';
 import { ServicesTree } from './ServicesTree';
-import { AWSServiceList } from '../types/model';
 import { AwsServiceModelView } from '../services/aws-service-model-view';
 import { FilterBar } from './FilterBar';
 
@@ -31,6 +30,7 @@ function Layout({
 
         {/* HTMX */}
         <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script src="/idiomorph-ext.min.js"></script>
 
         {/* Tailwind CSS */}
         <script src="https://cdn.tailwindcss.com"></script>
@@ -40,12 +40,11 @@ function Layout({
         <link rel="stylesheet" href="/fontawesome/css/solid.min.css" />
 
         {/* Prism.js for syntax highlighting */}
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
-        />
+        <link rel="stylesheet" href="/prism-ghcolors.css" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
 
         {/* Custom JavaScript */}
         <script src="/app.js"></script>
@@ -77,7 +76,7 @@ function Layout({
           }
         `}</style>
       </head>
-      <body className="bg-gray-50 min-h-screen overscroll-none">
+      <body className="bg-gray-50 min-h-screen overscroll-none" hx-ext="morph">
         <div className="h-screen w-screen flex flex-col overflow-hidden">
           {/* Header */}
           <div className="w-screen px-4 py-2 border-b border-gray-200 flex justify-between items-center flex-none">
@@ -86,7 +85,7 @@ function Layout({
           </div>
           <div className="w-screen flex flex-1 overflow-hidden">
             {/* Left sidebar (tree) */}
-            <div className="w-full md:w-1/4 bg-white border-r border-gray-200 flex flex-col">
+            <div className="w-full md:w-1/4 bg-white flex flex-col flex-none">
               <div className="p-4 border-b border-gray-200">
                 <div>
                   <FilterBar searchTerm={serviceModel.currentFilter} />
@@ -97,19 +96,24 @@ function Layout({
               </div>
             </div>
 
-            {/* Divider */}
-            <div className='bg-white w-2 size-grip cursor-col-resize grid'>
-              <i className="text-gray-400 fa-solid fa-grip-lines-vertical self-center"></i>
+            {/* Vertical Divider */}
+            <div className='bg-gray-100 size-grip cursor-col-resize grid border-r border-l border-gray-200'>
+              <div className="bg-gray-200 h-32 self-center" style={{ width: 2, margin: 3 }}></div>
             </div>
 
             {/* Main content */}
-            <div className="flex-1 flex flex-col main-content">
+            <div className="flex-1 flex flex-col main-content overflow-hidden">
               {/* Request section */}
               <div className="flex-1 p-4 border-b border-gray-200">
                 <div
                   id="request-form"
                   className="h-full"
                 >{requestForm}</div>
+              </div>
+
+              {/* Horizontal Divider */}
+              <div className='bg-gray-100 size-grip cursor-row-resize grid border-t border-b border-gray-200' data-dir="down">
+                <div className="bg-gray-200 w-32 justify-self-center" style={{ height: 2, margin: 3 }}></div>
               </div>
 
               {/* Response/Log section */}
@@ -119,13 +123,14 @@ function Layout({
               >{responseBox}</div>
             </div>
 
-            {/* Divider */}
-            <div className='bg-white w-2 size-grip cursor-col-resize grid' data-dir="right">
-              <i className="text-gray-400 fa-solid fa-grip-lines-vertical self-center"></i>
+            {/* Vertical Divider */}
+            <div className='bg-gray-100 size-grip cursor-col-resize grid border-r border-l border-gray-200' data-dir="right">
+              <div className="bg-gray-200 h-32 self-center" style={{ width: 2, margin: 3 }}></div>
             </div>
 
             {/* Right sidebar (logs) */}
-            <div className="w-full md:w-1/4 bg-white border-l border-gray-200 flex flex-col">
+            <div className="w-full md:w-1/4 bg-white flex flex-col flex-none"
+              hx-get="/logs" hx-trigger="logUpdated from:body" hx-swap="morph:innerHTML scroll:#log-entries:bottom">
               {requestLog}
             </div>
           </div>

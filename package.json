@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Web application for exploring and testing AWS APIs",
   "scripts": {
-    "scrape-calls": "tsx build-tools/scrape-calls.ts",
+    "parse-model": "tsx build-tools/parse-model.ts",
     "build": "tsc",
     "start": "NODE_ENV=production node dist/server.js",
     "dev": "NODE_ENV=development nodemon --exec tsx src/server.ts",
@@ -28,11 +28,15 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "jsonc-parser": "^3.3.1",
+    "@aws-sdk/credential-providers": "^3.848.0",
+    "@aws-sdk/ec2-metadata-service": "^3.848.0",
+    "@aws-sdk/shared-ini-file-loader": "^3.374.0",
+    "aws-sdk-js-v3-all": "^3",
     "express": "^5.1.0",
+    "jsonc-parser": "^3.3.1",
+    "proxy-agent": "^6.5.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "aws-sdk-js-v3-all": "^3"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",

@@ -1,53 +1,89 @@
 import React from 'react';
-import { CredentialsSelectorProps, CredentialSource } from '../types';
+import { CredentialSource } from '../types';
+import { ALL_REGIONS, CredentialViewModel } from '../services/credentialsManager';
 
-interface ExtendedCredentialsSelectorProps extends CredentialsSelectorProps {
-  selectedCredential?: CredentialSource | null;
+export function CredentialsCorner(vm: CredentialViewModel) {
+  return <div id='credentials-corner'>
+    {CredentialsSelector({
+      credentials: vm.credentials,
+      selectedCredential: vm.selectedCredential
+    })}
+    {RegionSelector({
+      selectedRegion: vm.selectedRegion,
+      defaultRegion: vm.selectedCredential?.defaultRegion
+    })}
+  </div>;
 }
 
-export function CredentialsSelector({ credentials = [], selected, selectedCredential = null }: ExtendedCredentialsSelectorProps): React.ReactElement {
+interface CredentialsSelectorProps {
+  credentials: CredentialSource[];
+  selectedCredential?: CredentialSource;
+}
+
+function CredentialsSelector({ credentials, selectedCredential }: CredentialsSelectorProps): React.ReactElement {
   return (
     <span>
-      <label className="text-sm font-medium text-gray-700 mr-4" htmlFor="credentials-selector">
-        AWS Credentials
+      <label className="text-sm font-medium text-gray-700 ml-4 mr-2" htmlFor="credentials-selector">
+        Credentials
       </label>
       <select
         id="credentials-selector"
         name="credentials"
         className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        hx-get="/credentials/select"
-        hx-target="#credentials-info"
-        hx-swap="innerHTML"
+        hx-post="/credentials/select-credential"
+        hx-target="#credentials-corner"
         hx-trigger="change"
         value={
           selectedCredential
             ? JSON.stringify(selectedCredential)
-            : selected
-            ? JSON.stringify(selected)
             : ''
         }
-        onChange={() => {}}
       >
         <option value="">Select credentials...</option>
         {credentials.map((cred, index) => (
-          <option
-            key={index}
-            value={JSON.stringify(cred)}
-          >
+          <option key={index} value={JSON.stringify(cred)}>
             {cred.name}
           </option>
         ))}
       </select>
-      <div id="credentials-info" className="mt-2">
-        {(selectedCredential || selected) ? (
-          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-            <div>Type: {(selectedCredential || selected)?.type}</div>
-            <div className="mt-1">
-              Region: {(selectedCredential || selected)?.region || 'us-east-1'}
-            </div>
-          </div>
-        ) : null}
-      </div>
+    </span>
+  );
+}
+
+export interface RegionSelectorProps {
+  selectedRegion?: string;
+  defaultRegion?: string;
+}
+
+function RegionSelector({ defaultRegion, selectedRegion }: RegionSelectorProps): React.ReactElement {
+  const regions = [
+    ...ALL_REGIONS.map(region => [region, region]),
+  ];
+  if (defaultRegion) {
+    regions.unshift([`${defaultRegion} (default)`, 'credential-default']);
+  }
+
+  return (
+    <span>
+      <label className="text-sm font-medium text-gray-700 ml-4 mr-2" htmlFor="region-selector">
+        Region
+      </label>
+      <select
+        id="region-selector"
+        name="region"
+        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        value={selectedRegion ?? (defaultRegion ? 'credential-default' : '')}
+        hx-post="/credentials/select-region"
+        hx-target="#credentials-corner"
+        hx-trigger="change"
+      >
+        <option value="">Select region...</option>
+        {regions.map(([regionName, regionKey], index) => (
+          <option key={index} value={regionKey}>
+            {regionName}
+          </option>
+        ))}
+      </select>
     </span>
   );
 }

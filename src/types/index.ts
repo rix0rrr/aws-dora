@@ -18,39 +18,15 @@ export interface AWSProfile {
   sourceProfile?: string;
 }
 
-export interface CredentialSource {
-  type: 'environment' | 'profile' | 'ec2-instance';
+export type CredentialSource = {
   name: string;
-  region?: string;
-  profile?: AWSProfile;
-}
-
-// Request/Response Types
-export interface APIRequest {
-  service: string;
-  operation: string;
-  payload: Record<string, any>;
-  credentials: CredentialSource;
-  region: string;
-}
-
-export interface APIResponse {
-  success: boolean;
-  data?: Record<string, any>;
-  error?: string;
-  statusCode?: number;
-  requestId?: string;
-}
-
-export interface LogEntry {
-  id: string;
-  timestamp: Date;
-  service: string;
-  operation: string;
-  request: APIRequest;
-  response: APIResponse;
-  duration: number;
-}
+  defaultRegion?: string;
+} & (
+  | { type: 'environment'; }
+  | { type: 'profile'; profileName: string }
+  | { type: 'ec2-instance' }
+  | { type: 'container' }
+);
 
 // Template Types
 export interface FieldDefinition {
@@ -78,15 +54,6 @@ export interface ApiRequestFormProps {
   template?: RequestTemplate;
   credentials: CredentialSource[];
   selectedCredentials?: CredentialSource;
-}
-
-export interface CredentialsSelectorProps {
-  credentials: CredentialSource[];
-  selected?: CredentialSource;
-}
-
-export interface RequestLoggerProps {
-  logs: LogEntry[];
 }
 
 // Service Configuration Types

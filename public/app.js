@@ -17,8 +17,11 @@ document.addEventListener('htmx:afterSwap', function(detail) {
 });
 
 let startSize;
+let targetProp;
 let startX;
-let reverse = 1;
+let startY;
+let xFactor = 1;
+let yFactor = 0;
 let resizing;
 
 /**
@@ -30,17 +33,25 @@ function onMouseDown(event) {
     return;
   }
 
-  const dir = sizeGrip.getAttribute('data-dir');
-  const sizeTarget = dir === 'right' ? sizeGrip.nextElementSibling : sizeGrip.previousElementSibling;
+  const dir = sizeGrip.getAttribute('data-dir') ?? 'left';
+  const sizeTarget = dir === 'right' || dir === 'down' ? sizeGrip.nextElementSibling : sizeGrip.previousElementSibling;
   if (!sizeTarget) {
     return;
   }
 
-  reverse = dir === 'right' ? -1 : 1;
+  xFactor = dir === 'right' ? -1 : dir === 'left' ? 1 : 0;
+  yFactor = dir === 'down' ? -1 : dir === 'up' ? 1 : 0;
 
   resizing = sizeTarget;
-  startSize = sizeTarget.offsetWidth;
+  if (dir === 'left' || dir === 'right') {
+    startSize = sizeTarget.offsetWidth;
+    targetProp = 'width';
+  } else {
+    startSize = sizeTarget.offsetHeight;
+    targetProp = 'height';
+  }
   startX = event.screenX;
+  startY = event.screenY;
   event.preventDefault(); // Prevent text selection
 }
 
@@ -50,13 +61,13 @@ function onMouseMove(event) {
   }
 
   let deltaX = event.screenX - startX;
-  resizing.style.width = `${startSize + deltaX * reverse}px`;
+  let deltaY = event.screenY - startY;
+  resizing.style[targetProp] = `${startSize + deltaX * xFactor + deltaY * yFactor}px`;
 }
 
 function onMouseUp() {
   resizing = undefined;
 }
-
 
 // Initialize Prism syntax highlighting
 function initializeSyntaxHighlighting() {

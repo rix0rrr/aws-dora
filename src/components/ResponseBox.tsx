@@ -1,6 +1,11 @@
 import React from 'react';
 
 export interface ResponseBoxProps {
+  responseJson: string;
+  duration: number;
+  totalRetryDelay: number;
+  requestId: string;
+  attempts: number;
 }
 
 export function EmptyResponseBox(): React.ReactElement {
@@ -28,7 +33,19 @@ export function ErrorResponseBox(props: ErrorResponseBoxProps): React.ReactEleme
 }
 
 export function ResponseBox(props: ResponseBoxProps): React.ReactElement {
-  return <div>
+  return <div className="flex flex-col h-full w-full">
     <h2 className="text-2xl font-light text-black">Response</h2>
+    <div className="flex-1 overflow-auto w-full">
+      <pre className="bg-white p-4 rounded-lg shadow-sm fit-content">
+        <code className="language-js">
+          {props.responseJson}
+        </code>
+      </pre>
+    </div>
+    <div className="text-sm text-gray-500 mt-2">
+      RequestID {props.requestId}
+      {props.duration ? ` • ${props.duration}ms` : ''}
+      {props.totalRetryDelay ? ` • Total retry delay: ${props.totalRetryDelay}ms` : ''}
+    </div>
   </div>;
 }

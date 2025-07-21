@@ -3,22 +3,27 @@ import express, { Request, Response, NextFunction, Application } from 'express';
 import { AppConfig, CredentialSource } from './types';
 import Layout from './components/Layout';
 import { EmptyRequestForm } from './components/ApiRequestForm';
-import { CredentialsSelector, EmptyCredentialsSelector } from './components/CredentialsSelector';
-import { EmptyRequestLogger } from './components/Log';
-import { detectCredentialSources } from './services/credentialsManager';
+import { CredentialsCorner } from './components/CredentialsSelector';
+import { CredentialViewModel, detectCredentialSources } from './services/credentialsManager';
 
 // Import routes
 import makeTreeRouter from './routes/tree';
-import makeApiTemplateRouter from './routes/calls';
-import credentialsRouter from './routes/credentials';
-import executeRouter from './routes/execute';
-import logsRouter from './routes/logs';
+import makeCallRouter from './routes/calls';
+import makeCredentialsRouter from './routes/credentials';
+import makeLogsRouter from './routes/logs';
 import { renderJSX } from './util/jsx';
 import { AwsServiceModelView } from './services/aws-service-model-view';
 import { EmptyResponseBox } from './components/ResponseBox';
+import { RequestLog } from './services/request-log';
+import { request } from 'http';
+import { Log } from './components/Log';
 
 async function startup() {
   const serviceModel = await AwsServiceModelView.fromBuiltinModel();
+  const requestLog = new RequestLog();
+  const credVm: CredentialViewModel = {
+    credentials: await detectCredentialSources(),
+  };
 
   const app: Application = express();
   const PORT: number = parseInt(process.env.PORT || '12319', 10);
@@ -55,28 +60,22 @@ async function startup() {
 
   // Use routes
   app.use('/tree', makeTreeRouter(serviceModel));
-  app.use('/call', makeApiTemplateRouter(serviceModel));
-  app.use('/credentials', credentialsRouter);
-  app.use('/execute', executeRouter);
-  app.use('/logs', logsRouter);
+  app.use('/call', makeCallRouter(serviceModel, requestLog));
+  app.use('/credentials', makeCredentialsRouter(credVm));
+  app.use('/logs', makeLogsRouter(requestLog));
 
   // Main route
   app.get('/', async (req: Request, res: Response): Promise<void> => {
     try {
       // Detect available credentials
-      const credentials: CredentialSource[] = await detectCredentialSources();
 
       // Render the components
-      const credentialsContent = credentials.length > 0
-        ? CredentialsSelector({ credentials })
-        : EmptyCredentialsSelector();
-
       const html: string = '<!DOCTYPE html>' + renderJSX(Layout({
         serviceModel,
         requestForm: EmptyRequestForm(),
-        credentialsContent,
+        credentialsContent: CredentialsCorner(credVm),
         responseBox: EmptyResponseBox(),
-        requestLog: EmptyRequestLogger(),
+        requestLog: Log({ requestLog }),
       }));
       res.send(html);
     } catch (error) {

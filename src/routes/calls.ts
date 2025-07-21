@@ -3,8 +3,11 @@ import { AwsServiceModelView } from '../services/aws-service-model-view';
 import { ApiRequestForm } from '../components/ApiRequestForm';
 import { renderJSX } from '../util/jsx';
 import { ErrorResponseBox, ResponseBox } from '../components/ResponseBox';
+import { callSdk } from '../util/call-sdk';
+import { RequestLog } from '../services/request-log';
+import { CredentialSource } from '../types';
 
-function makeCallRouter(serviceModel: AwsServiceModelView) {
+function makeCallRouter(serviceModel: AwsServiceModelView, requestLog: RequestLog) {
   const router = express.Router();
 
   // Get API template for a specific service and operation
@@ -36,14 +39,16 @@ function makeCallRouter(serviceModel: AwsServiceModelView) {
   });
 
   // Get API template for a specific service and operation
-  router.post('/:operationId', (req: Request, res: Response): void => {
+  router.post('/:operationId', async (req: Request, res: Response) => {
     try {
       const { operationId } = req.params;
       console.log(req.body);
-      const { credentials, request } = req.body;
+      const credentialsStr: string | undefined = req.body.credentials;
+      const request: string | undefined = req.body.request;
+      const region: string | undefined = req.body.region;
       const op = serviceModel.getOperationById(operationId ?? '');
 
-      if (!credentials) {
+      if (!credentialsStr) {
         throw new Error('Select a credential source');
       }
       if (!request) {
@@ -53,8 +58,42 @@ function makeCallRouter(serviceModel: AwsServiceModelView) {
         throw new Error(`No such operation: ${operationId}`);
       }
 
+      const credentials: CredentialSource = JSON.parse(credentialsStr);
+
+      const startTime = new Date();
+      const selectedRegion = region === 'credential-default' ? credentials.defaultRegion : region;
+      if (!selectedRegion) {
+        throw new Error('Select a region');
+      }
+
+      const parsedRequest = JSON.parse(request);
+
+      const response = await callSdk(op.service.shortName, op.service.className, op.operation.name, parsedRequest, credentials, selectedRegion);
+
+      const attempts = response.response.$metadata?.attempts ?? 1;
+      const requestId = response.response.$metadata?.requestId ?? '';
+      const totalRetryDelay = response.response.$metadata?.totalRetryDelay ?? 0;
+      delete response.response.$metadata;
+
+      requestLog.add({
+        credentials,
+        operation: op.operation.name,
+        service: op.service.name,
+        request: JSON.stringify(parsedRequest, null, 2),
+        response: JSON.stringify(response.response, null, 2),
+        region: selectedRegion,
+        timestamp: startTime,
+      });
+
+      res.header('HX-Trigger', 'logUpdated');
+
       // Render the API request form
       res.send(renderJSX(ResponseBox({
+        responseJson: JSON.stringify(response.response, null, 2),
+        duration: response.duration || 0,
+        attempts,
+        requestId,
+        totalRetryDelay,
       })));
     } catch (e: any) {
       res.send(renderJSX(ErrorResponseBox({
@@ -65,5 +104,7 @@ function makeCallRouter(serviceModel: AwsServiceModelView) {
 
   return router;
 }
+
+
 
 export default makeCallRouter;

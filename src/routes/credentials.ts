@@ -1,48 +1,36 @@
 import express, { Request, Response } from 'express';
-import React from 'react';
-import { renderToString } from 'react-dom/server';
-import { detectCredentialSources } from '../services/credentialsManager';
 import { CredentialSource } from '../types';
+import { CredentialViewModel } from '../services/credentialsManager';
+import { renderJSX } from '../util/jsx';
+import { CredentialsCorner } from '../components/CredentialsSelector';
 
-const router = express.Router();
+export default function makeCredentialsRouter(credVM: CredentialViewModel) {
+  const router = express.Router();
 
-// Get all available credentials
-router.get('/', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const credentials = await detectCredentialSources();
-    res.json(credentials);
-  } catch (error) {
-    console.error('Error detecting credentials:', error);
-    res.status(500).json({ error: 'Failed to detect credentials' });
-  }
-});
+  // Handle credential selection
+  router.post('/select-credential', (req: Request, res: Response): void => {
+    const { credentials } = req.body;
 
-// Handle credential selection
-router.get('/select', (req: Request, res: Response): void => {
-  const { credentials } = req.query;
+    try {
+      const selected: CredentialSource = credentials ? JSON.parse(credentials) : undefined;
 
-  if (!credentials || typeof credentials !== 'string') {
-    res.send('');
-    return;
-  }
+      credVM.selectedCredential = selected;
 
-  try {
-    const credentialInfo: CredentialSource = JSON.parse(credentials);
+      res.send(renderJSX(CredentialsCorner(credVM)));
+    } catch (error) {
+      console.error('Error parsing credentials:', error);
+      res.send('<div class="text-sm text-red-600">Error parsing credentials</div>');
+    }
+  });
 
-    const html = `
-      <div class="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-        <div>Type: ${credentialInfo.type}</div>
-        <div class="mt-1">Region: ${credentialInfo.region || 'us-east-1'}</div>
-        ${credentialInfo.type === 'profile' && credentialInfo.profile ?
-          `<div class="mt-1">Profile: ${credentialInfo.profile.name}</div>` : ''}
-      </div>
-    `;
+  // Handle credential selection
+  router.post('/select-region', (req: Request, res: Response): void => {
+    const { region } = req.body;
 
-    res.send(html);
-  } catch (error) {
-    console.error('Error parsing credentials:', error);
-    res.send('<div class="text-sm text-red-600">Error parsing credentials</div>');
-  }
-});
+    credVM.selectedRegion = region ? region : undefined;
 
-export default router;
+    res.send(renderJSX(CredentialsCorner(credVM)));
+  });
+
+  return router;
+}

@@ -14,6 +14,7 @@ export interface AWSResourceHaver {
 export interface AWSService extends AWSResourceHaver {
   name: string;
   shortName: string;
+  className: string;
 }
 
 export interface AWSResource extends AWSResourceHaver {
@@ -23,6 +24,7 @@ export interface AWSResource extends AWSResourceHaver {
 export interface AWSOperation {
   name: string;
   operationId: string;
+  methodName: string;
   description?: string;
   requestTemplate?: Record<string, unknown>;
 }
