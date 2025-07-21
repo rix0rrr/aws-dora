@@ -1,7 +1,10 @@
 {
-  "name": "aws-api-explorer",
+  "name": "aws-dora",
   "version": "1.0.0",
   "description": "Web application for exploring and testing AWS APIs",
+  "bin": {
+      "aws-dora": "tsx src/server.ts"
+  },
   "scripts": {
     "parse-model": "tsx build-tools/parse-model.ts",
     "build": "tsc",
