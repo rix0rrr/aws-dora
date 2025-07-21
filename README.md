@@ -1,4 +1,4 @@
-# AWS API Explorer
+# AWS Dora
 
 A web-based tool for exploring and testing AWS APIs with a user-friendly interface.
 
