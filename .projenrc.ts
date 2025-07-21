@@ -61,7 +61,10 @@ const project = new typescript.TypeScriptAppProject({
   releasableCommits: ReleasableCommits.featuresAndFixes(),
 });
 
-project.gitignore.addPatterns('.DS_Store');
+project.gitignore.addPatterns(
+  '.DS_Store',
+  '!public',
+);
 project.addTask('parse-model', {
   description: 'Parse the AWS service model and generate data files',
   exec: 'tsx build-tools/parse-model.ts',
