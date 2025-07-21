@@ -3,6 +3,7 @@ import { TypeScriptJsxMode } from 'projen/lib/javascript';
 const project = new typescript.TypeScriptAppProject({
   name: 'aws-dora',
   description: 'Web application for exploring and testing AWS APIs',
+  repository: 'https://github.com/rix0rrr/aws-dora',
 
   defaultReleaseBranch: 'main',
   projenrcTs: true,

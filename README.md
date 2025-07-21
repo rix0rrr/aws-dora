@@ -2,6 +2,8 @@
 
 A web-based tool for exploring and testing AWS APIs with a user-friendly interface.
 
+![Screenshot](screenshot.png)
+
 ## Usage
 
 ```sh

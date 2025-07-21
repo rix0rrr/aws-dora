@@ -1,6 +1,10 @@
 {
   "name": "aws-dora",
   "description": "Web application for exploring and testing AWS APIs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rix0rrr/aws-dora"
+  },
   "bin": {
     "aws-dora": "tsx src/server.ts"
   },
