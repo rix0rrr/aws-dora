@@ -1,5 +1,3 @@
-import { Request, Response } from 'express';
-
 // Credential Types
 export interface AWSCredentials {
   accessKeyId: string;
@@ -22,7 +20,7 @@ export type CredentialSource = {
   name: string;
   defaultRegion?: string;
 } & (
-  | { type: 'environment'; }
+  | { type: 'environment' }
   | { type: 'profile'; profileName: string }
   | { type: 'ec2-instance' }
   | { type: 'container' }
@@ -43,11 +41,6 @@ export interface RequestTemplate {
   operation: string;
   template: Record<string, any>;
   fields: Record<string, FieldDefinition>;
-}
-
-// Express Types
-export interface TypedRequest<T = Record<string, any>> extends Request {
-  body: T;
 }
 
 export interface ApiRequestFormProps {

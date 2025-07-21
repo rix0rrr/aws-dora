@@ -1,6 +1,7 @@
-import { CredentialSource } from "../types";
-import { ProxyAgent } from 'proxy-agent';
 import { fromContainerMetadata, fromEnv, fromIni, fromInstanceMetadata } from '@aws-sdk/credential-providers';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
+import { ProxyAgent } from 'proxy-agent';
+import { CredentialSource } from '../types';
 
 const AGENT = new ProxyAgent();
 
@@ -15,6 +16,7 @@ export async function callSdk(
   const start = Date.now();
 
   // Import the SDK client dynamically based on the service name
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const allSdks = require('aws-sdk-js-v3-all');
   const module = allSdks[serviceName];
   if (!module) {
@@ -43,6 +45,10 @@ export async function callSdk(
     */
     credentials: credentialProviderFromSource(credentials),
     region,
+    requestHandler: new NodeHttpHandler({
+      httpAgent: AGENT,
+      httpsAgent: AGENT,
+    }),
   });
 
   // Call the operation and return the result
@@ -62,7 +68,7 @@ export interface CallSdkResponse {
       requestId: string;
       extendedRequestId?: string;
       totalRetryDelay: number;
-    }
+    };
   };
   duration: number;
 }

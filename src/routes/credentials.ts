@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
-import { CredentialSource } from '../types';
-import { CredentialViewModel } from '../services/credentialsManager';
-import { renderJSX } from '../util/jsx';
 import { CredentialsCorner } from '../components/CredentialsSelector';
+import { CredentialViewModel } from '../services/credentialsManager';
+import { CredentialSource } from '../types';
+import { renderJSX } from '../util/jsx';
 
 export default function makeCredentialsRouter(credVM: CredentialViewModel) {
   const router = express.Router();

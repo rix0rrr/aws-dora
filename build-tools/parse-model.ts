@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { isService, Operation, Resource, ResourceHaver, Service, Shape, SmithyModel, Structure, ShapeRef, Value, assertType, assertValue, Unit, builtinShape } from '../src/types/smithy';
 import { AWSOperation, AWSResourceHaver, AWSResource, AWSService, AWSServiceList } from '../src/types/model';
+import { isService, Operation, Resource, ResourceHaver, Service, Shape, SmithyModel, Structure, ShapeRef, Value, assertType, assertValue, Unit, builtinShape } from '../src/types/smithy';
 
 async function main() {
   const outputFile = path.join(__dirname, '..', 'src', 'data', 'aws-services.json');
@@ -26,7 +26,7 @@ async function main() {
 
 async function readServicesFromModelFile(fileName: string, model: SmithyModel): Promise<AWSService[]> {
   const services = Object.entries(model.shapes ?? {})
-    .flatMap(([id, shape]) => isService(shape) ? [parseService(fileName, id, shape, model)] : []);
+    .flatMap(([id, shp]) => isService(shp) ? [parseService(fileName, id, shp, model)] : []);
 
   return services;
 }
@@ -80,28 +80,28 @@ function exampleValue(key: string, x: Value, model: SmithyModel): unknown {
   const recursionBreaker = new Set<Shape>();
   return recurse(key, x);
 
-  function recurse(key: string, x: Value): any {
-    recursionBreaker.add(x);
+  function recurse(kk: string, vv: Value): any {
+    recursionBreaker.add(vv);
     try {
-      switch (x.type) {
+      switch (vv.type) {
         case 'structure':
-          return Object.fromEntries(Object.entries(x.members)
+          return Object.fromEntries(Object.entries(vv.members)
             .filter(([_, v]) => !recursionBreaker.has(shape(v, model)))
             .map(([k, v]) => [k, recurse(k, assertValue(shape(v, model)))]));
         case 'list':
-          const elShape = assertValue(shape(x.member, model));
-          return !recursionBreaker.has(elShape) ? [recurse(key, elShape)] : [];
+          const elShape = assertValue(shape(vv.member, model));
+          return !recursionBreaker.has(elShape) ? [recurse(kk, elShape)] : [];
         case 'map':
-          const valueShape = assertValue(shape(x.value, model));
+          const valueShape = assertValue(shape(vv.value, model));
           if (recursionBreaker.has(valueShape)) {
             return {};
           }
-          const keyValue = recurse(`${key}Key`, assertValue(shape(x.key, model)));
-          const valueValue = recurse(`${key}Value`, valueShape);
+          const keyValue = recurse(`${kk}Key`, assertValue(shape(vv.key, model)));
+          const valueValue = recurse(`${kk}Value`, valueShape);
           return { [keyValue as any]: valueValue };
         case 'string':
         case 'document':
-          return key;
+          return kk;
         case 'boolean':
           return true;
         case 'integer':
@@ -112,20 +112,20 @@ function exampleValue(key: string, x: Value, model: SmithyModel): unknown {
         case 'timestamp':
           return '2000-01-01T00:00:00Z';
         case 'blob':
-          return `${key}Data`;
+          return `${kk}Data`;
         case 'unit':
           return {};
         case 'union':
-          const firstBranch = assertValue(shape(Object.values(x.members)[0], model));
-          return recurse(key, firstBranch);
+          const firstBranch = assertValue(shape(Object.values(vv.members)[0], model));
+          return recurse(kk, firstBranch);
         case 'enum':
-          const firstShapeRef = Object.values(x.members)[0];
-          return firstShapeRef.traits?.['smithy.api#enumValue'] ?? key;
+          const firstShapeRef = Object.values(vv.members)[0];
+          return firstShapeRef.traits?.['smithy.api#enumValue'] ?? kk;
         default:
-          assertNever(x);
+          assertNever(vv);
       }
     } finally {
-      recursionBreaker.delete(x);
+      recursionBreaker.delete(vv);
     }
   }
 }

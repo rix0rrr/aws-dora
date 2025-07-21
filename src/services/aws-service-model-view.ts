@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
+import path from 'path';
 import { RequestTemplate, FieldDefinition } from '../types';
 import { AWSOperation, AWSResource, AWSResourceHaver, AWSService, AWSServiceList } from '../types/model';
-import path from 'path';
 
 
 export class AwsServiceModelView {
@@ -37,7 +37,6 @@ export class AwsServiceModelView {
   }
 
   public getNodeById(node: string, source: 'filtered' | 'all'): AWSResourceHaver | undefined {
-    const self = this;
     let ret: AWSResourceHaver | undefined;
     for (const service of source === 'filtered' ? this.filtered() : this.services) {
       recurse(service);
@@ -89,17 +88,17 @@ export class AwsServiceModelView {
     const self = this;
 
     return this.services
-        .map(service => {
-          if (this.matches(service.name) || this.matches(service.shortName)) {
-            return service;
-          }
+      .map(service => {
+        if (this.matches(service.name) || this.matches(service.shortName)) {
+          return service;
+        }
 
-          return {
-            ...service,
-            operations: service.operations.filter(matchingOperation),
-            resources: service.resources.map(filterResourceMembers).filter(hasMembers),
-          };
-        }).filter(hasMembers);
+        return {
+          ...service,
+          operations: service.operations.filter(matchingOperation),
+          resources: service.resources.map(filterResourceMembers).filter(hasMembers),
+        };
+      }).filter(hasMembers);
 
     function matchingOperation(op: AWSOperation): boolean {
       const ret = self.matches(op.name) || self.matches(op.description || '');
@@ -146,121 +145,121 @@ export function getRequestTemplate(service: string, operation: string): RequestT
     'EC2.DescribeInstances': {
       required: {},
       optional: {
-        InstanceIds: ["i-1234567890abcdef0"],
+        InstanceIds: ['i-1234567890abcdef0'],
         Filters: [
           {
-            Name: "instance-state-name",
-            Values: ["running"]
-          }
+            Name: 'instance-state-name',
+            Values: ['running'],
+          },
         ],
-        MaxResults: 10
-      }
+        MaxResults: 10,
+      },
     },
     'EC2.RunInstances': {
       required: {
-        ImageId: "ami-12345678",
+        ImageId: 'ami-12345678',
         MinCount: 1,
-        MaxCount: 1
+        MaxCount: 1,
       },
       optional: {
-        InstanceType: "t2.micro",
-        KeyName: "my-key-pair",
-        SecurityGroupIds: ["sg-12345678"],
-        SubnetId: "subnet-12345678"
-      }
+        InstanceType: 't2.micro',
+        KeyName: 'my-key-pair',
+        SecurityGroupIds: ['sg-12345678'],
+        SubnetId: 'subnet-12345678',
+      },
     },
 
     // S3 Templates
     'S3.ListBuckets': {
       required: {},
-      optional: {}
+      optional: {},
     },
     'S3.CreateBucket': {
       required: {
-        Bucket: "my-bucket-name"
+        Bucket: 'my-bucket-name',
       },
       optional: {
         CreateBucketConfiguration: {
-          LocationConstraint: "us-west-2"
-        }
-      }
+          LocationConstraint: 'us-west-2',
+        },
+      },
     },
     'S3.GetObject': {
       required: {
-        Bucket: "my-bucket-name",
-        Key: "my-object-key"
+        Bucket: 'my-bucket-name',
+        Key: 'my-object-key',
       },
       optional: {
-        Range: "bytes=0-1023"
-      }
+        Range: 'bytes=0-1023',
+      },
     },
 
     // Lambda Templates
     'Lambda.ListFunctions': {
       required: {},
       optional: {
-        MaxItems: 50
-      }
+        MaxItems: 50,
+      },
     },
     'Lambda.CreateFunction': {
       required: {
-        FunctionName: "my-function",
-        Runtime: "nodejs18.x",
-        Role: "arn:aws:iam::123456789012:role/lambda-role",
-        Handler: "index.handler",
+        FunctionName: 'my-function',
+        Runtime: 'nodejs18.x',
+        Role: 'arn:aws:iam::123456789012:role/lambda-role',
+        Handler: 'index.handler',
         Code: {
-          ZipFile: "exports.handler = async (event) => { return 'Hello World'; };"
-        }
+          ZipFile: "exports.handler = async (event) => { return 'Hello World'; };",
+        },
       },
       optional: {
-        Description: "My Lambda function",
+        Description: 'My Lambda function',
         Timeout: 30,
-        MemorySize: 128
-      }
+        MemorySize: 128,
+      },
     },
 
     // DynamoDB Templates
     'DynamoDB.ListTables': {
       required: {},
       optional: {
-        Limit: 100
-      }
+        Limit: 100,
+      },
     },
     'DynamoDB.GetItem': {
       required: {
-        TableName: "my-table",
+        TableName: 'my-table',
         Key: {
-          "id": {
-            "S": "123"
-          }
-        }
+          id: {
+            S: '123',
+          },
+        },
       },
       optional: {
-        ConsistentRead: true
-      }
+        ConsistentRead: true,
+      },
     },
 
     // IAM Templates
     'IAM.ListUsers': {
       required: {},
       optional: {
-        MaxItems: 100
-      }
+        MaxItems: 100,
+      },
     },
     'IAM.CreateUser': {
       required: {
-        UserName: "new-user"
+        UserName: 'new-user',
       },
       optional: {
-        Path: "/",
+        Path: '/',
         Tags: [
           {
-            Key: "Department",
-            Value: "Engineering"
-          }
-        ]
-      }
-    }
+            Key: 'Department',
+            Value: 'Engineering',
+          },
+        ],
+      },
+    },
   };
 
   const key = `${service}.${operation}`;
@@ -268,8 +267,8 @@ export function getRequestTemplate(service: string, operation: string): RequestT
     required: {},
     optional: {
       // Generic placeholder
-      "Parameter": "value"
-    }
+      Parameter: 'value',
+    },
   };
 
   // Generate field definitions
@@ -279,7 +278,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
     fields[field] = {
       type: inferType(template.required[field]),
       required: true,
-      example: template.required[field]
+      example: template.required[field],
     };
   });
 
@@ -287,7 +286,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
     fields[field] = {
       type: inferType(template.optional[field]),
       required: false,
-      example: template.optional[field]
+      example: template.optional[field],
     };
   });
 
@@ -295,7 +294,7 @@ export function getRequestTemplate(service: string, operation: string): RequestT
     service,
     operation,
     template: { ...template.required, ...template.optional },
-    fields
+    fields,
   };
 }
 
@@ -325,10 +324,4 @@ export function getFieldMetadata(service: string, operation: string): Record<str
   });
 
   return metadata;
-}
-
-interface ServiceInfo {
-  category: string;
-  service: string;
-  operations: string[];
 }

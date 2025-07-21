@@ -1,5 +1,3 @@
-import { ResourceHaver } from "./smithy";
-
 export interface AWSServiceList {
   services: AWSService[];
 }

@@ -1,6 +1,6 @@
-import { CredentialSource } from '../types';
-import { loadSharedConfigFiles } from '@aws-sdk/shared-ini-file-loader';
 import { MetadataService } from '@aws-sdk/ec2-metadata-service';
+import { loadSharedConfigFiles } from '@aws-sdk/shared-ini-file-loader';
+import { CredentialSource } from '../types';
 
 export const ALL_REGIONS = [
   'af-south-1',
@@ -66,7 +66,7 @@ export async function detectCredentialSources(): Promise<CredentialSource[]> {
   // 2. AWS Config/Credentials Files
   const profileNames = Array.from(new Set([
     ...Object.keys(configFiles.configFile),
-    ...Object.keys(configFiles.credentialsFile)
+    ...Object.keys(configFiles.credentialsFile),
   ])).sort();
 
   for (const profileName of profileNames) {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { AWSOperation, AWSResource, AWSService, AWSServiceList } from '../types/model';
 import { AwsServiceModelView } from '../services/aws-service-model-view';
+import { AWSOperation, AWSResource, AWSService } from '../types/model';
 
 interface ServicesTreeProps {
   serviceModel: AwsServiceModelView;
@@ -13,7 +13,7 @@ export function ServicesTree({ serviceModel }: ServicesTreeProps): React.ReactEl
       service,
       serviceModel,
     }))}
-  </div>
+  </div>;
 }
 
 interface ServersTreeServiceProps {
@@ -40,7 +40,7 @@ export function ServicesTreeService({ service, serviceModel }: ServersTreeServic
       ? <div className="ml-4">
         {service.resources.map(resource => ServicesTreeResource({ resource, serviceModel }) )}
         {service.operations.map(renderOperation)}
-        </div>
+      </div>
       : undefined}
   </div>;
 }
@@ -68,9 +68,9 @@ export function ServicesTreeResource({ resource, serviceModel }: ServicesTreeRes
 
     {expanded
       ? <div className="ml-4">
-        {resource.resources.map(resource => ServicesTreeResource({ resource, serviceModel }) )}
+        {resource.resources.map(res => ServicesTreeResource({ resource: res, serviceModel }) )}
         {resource.operations.map(renderOperation)}
-        </div>
+      </div>
       : undefined}
   </div>;
 }

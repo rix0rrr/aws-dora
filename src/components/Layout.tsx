@@ -1,7 +1,7 @@
 import React from 'react';
+import { FilterBar } from './FilterBar';
 import { ServicesTree } from './ServicesTree';
 import { AwsServiceModelView } from '../services/aws-service-model-view';
-import { FilterBar } from './FilterBar';
 
 interface ExtendedLayoutProps {
   serviceModel: AwsServiceModelView;

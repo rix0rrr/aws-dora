@@ -1,22 +1,20 @@
 import express, { Request, Response, NextFunction, Application } from 'express';
 
-import { AppConfig, CredentialSource } from './types';
-import Layout from './components/Layout';
 import { EmptyRequestForm } from './components/ApiRequestForm';
 import { CredentialsCorner } from './components/CredentialsSelector';
-import { CredentialViewModel, detectCredentialSources } from './services/credentialsManager';
+import Layout from './components/Layout';
 
 // Import routes
-import makeTreeRouter from './routes/tree';
+import { Log } from './components/Log';
+import { EmptyResponseBox } from './components/ResponseBox';
 import makeCallRouter from './routes/calls';
 import makeCredentialsRouter from './routes/credentials';
 import makeLogsRouter from './routes/logs';
-import { renderJSX } from './util/jsx';
+import makeTreeRouter from './routes/tree';
 import { AwsServiceModelView } from './services/aws-service-model-view';
-import { EmptyResponseBox } from './components/ResponseBox';
+import { CredentialViewModel, detectCredentialSources } from './services/credentialsManager';
 import { RequestLog } from './services/request-log';
-import { request } from 'http';
-import { Log } from './components/Log';
+import { renderJSX } from './util/jsx';
 
 async function startup() {
   const serviceModel = await AwsServiceModelView.fromBuiltinModel();
@@ -29,21 +27,13 @@ async function startup() {
   const PORT: number = parseInt(process.env.PORT || '12319', 10);
   const NODE_ENV: string = process.env.NODE_ENV || 'development';
 
-  // Application configuration
-  const config: AppConfig = {
-    port: PORT,
-    // FIXME: Region from AWS config
-    defaultRegion: process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION ?? 'us-east-1',
-    logLevel: (process.env.LOG_LEVEL as AppConfig['logLevel']) || 'info'
-  };
-
   // Performance optimizations
   if (NODE_ENV === 'production') {
     // Enable trust proxy for production
     app.set('trust proxy', 1);
 
     // Add security headers
-    app.use((req: Request, res: Response, next: NextFunction): void => {
+    app.use((_: Request, res: Response, next: NextFunction): void => {
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('X-Frame-Options', 'DENY');
       res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -55,7 +45,7 @@ async function startup() {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(express.static('public', {
-    maxAge: NODE_ENV === 'production' ? '1d' : 0
+    maxAge: NODE_ENV === 'production' ? '1d' : 0,
   }));
 
   // Use routes
@@ -65,7 +55,7 @@ async function startup() {
   app.use('/logs', makeLogsRouter(requestLog));
 
   // Main route
-  app.get('/', async (req: Request, res: Response): Promise<void> => {
+  app.get('/', async (_: Request, res: Response): Promise<void> => {
     try {
       // Detect available credentials
 
@@ -85,7 +75,7 @@ async function startup() {
   });
 
   // Error handling middleware
-  app.use((error: Error, req: Request, res: Response, next: NextFunction): void => {
+  app.use((error: Error, _: Request, res: Response, _next: NextFunction): void => {
     console.error('Express error:', error);
     res.status(500).json({ error: 'Internal server error' });
   });

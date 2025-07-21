@@ -1,4 +1,4 @@
-import { CredentialSource } from "../types";
+import { CredentialSource } from '../types';
 
 export interface LogEntry {
   timestamp: Date;

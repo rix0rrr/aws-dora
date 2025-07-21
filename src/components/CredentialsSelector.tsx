@@ -1,16 +1,16 @@
 import React from 'react';
-import { CredentialSource } from '../types';
 import { ALL_REGIONS, CredentialViewModel } from '../services/credentialsManager';
+import { CredentialSource } from '../types';
 
 export function CredentialsCorner(vm: CredentialViewModel) {
   return <div id='credentials-corner'>
     {CredentialsSelector({
       credentials: vm.credentials,
-      selectedCredential: vm.selectedCredential
+      selectedCredential: vm.selectedCredential,
     })}
     {RegionSelector({
       selectedRegion: vm.selectedRegion,
-      defaultRegion: vm.selectedCredential?.defaultRegion
+      defaultRegion: vm.selectedCredential?.defaultRegion,
     })}
   </div>;
 }
@@ -92,33 +92,33 @@ export function EmptyCredentialsSelector(): React.ReactElement {
   return React.createElement('div', { className: 'mb-4' }, [
     React.createElement('div', {
       key: 'warning',
-      className: 'p-3 bg-yellow-50 border border-yellow-200 rounded-md'
+      className: 'p-3 bg-yellow-50 border border-yellow-200 rounded-md',
     }, [
       React.createElement('div', {
         key: 'icon',
-        className: 'flex items-center'
+        className: 'flex items-center',
       }, [
         React.createElement('span', {
           key: 'icon-text',
-          className: 'text-yellow-600 mr-2'
+          className: 'text-yellow-600 mr-2',
         }, '⚠️'),
         React.createElement('span', {
           key: 'message',
-          className: 'text-sm text-yellow-800'
-        }, 'No AWS credentials detected. Please configure credentials to make API calls.')
-      ])
+          className: 'text-sm text-yellow-800',
+        }, 'No AWS credentials detected. Please configure credentials to make API calls.'),
+      ]),
     ]),
 
     React.createElement('div', {
       key: 'help',
-      className: 'mt-2 text-xs text-gray-500'
+      className: 'mt-2 text-xs text-gray-500',
     }, [
       React.createElement('p', { key: 'help-text' }, 'You can configure credentials using:'),
       React.createElement('ul', { key: 'help-list', className: 'list-disc list-inside mt-1 ml-2' }, [
         React.createElement('li', { key: 'env' }, 'Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)'),
         React.createElement('li', { key: 'profile' }, 'AWS CLI profiles (~/.aws/credentials)'),
-        React.createElement('li', { key: 'ec2' }, 'EC2 instance IAM roles')
-      ])
-    ])
+        React.createElement('li', { key: 'ec2' }, 'EC2 instance IAM roles'),
+      ]),
+    ]),
   ]);
 }

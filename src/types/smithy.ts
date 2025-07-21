@@ -1,6 +1,6 @@
 
 export interface SmithyModel {
-  smithy: "2.0";
+  smithy: '2.0';
   shapes?: Record<string, Shape>;
 }
 
@@ -13,17 +13,17 @@ export interface ResourceHaver {
 }
 
 export function isService(x: Shape): x is Service {
-  return x.type === "service";
+  return x.type === 'service';
 }
 
 export interface Service extends ResourceHaver {
-  type: "service";
+  type: 'service';
   version: string;
   traits?: Traits;
 }
 
 export interface Resource extends ResourceHaver {
-  type: "resource";
+  type: 'resource';
   create?: ShapeRef;
   put?: ShapeRef;
   read?: ShapeRef;
@@ -32,32 +32,32 @@ export interface Resource extends ResourceHaver {
 }
 
 export interface ListType {
-  type: "list";
+  type: 'list';
   member: ShapeRef;
   traits?: Traits;
 }
 
 export interface MapType {
-  type: "map";
+  type: 'map';
   key: ShapeRef;
   value: ShapeRef;
   traits?: Traits;
 }
 
 export interface Union {
-  type: "union";
+  type: 'union';
   members: Record<string, ShapeRef>;
   traits?: Traits;
 }
 
 export interface Enum {
-  type: "enum";
+  type: 'enum';
   members: Record<string, ShapeRef>;
   traits?: Traits;
 }
 
 export interface Operation {
-  type: "operation";
+  type: 'operation';
   input: ShapeRef;
   output: ShapeRef;
   errors?: ShapeRef[];
@@ -65,18 +65,18 @@ export interface Operation {
 }
 
 export interface Structure {
-  type: "structure";
+  type: 'structure';
   members: Record<string, ShapeRef>;
   traits?: Traits;
 }
 
 export interface PrimitiveType {
-  type: "string" | "long" | "integer" | "boolean" | "double" | "float" | "timestamp" | "blob" | "document";
+  type: 'string' | 'long' | 'integer' | 'boolean' | 'double' | 'float' | 'timestamp' | 'blob' | 'document';
   traits?: Traits;
 }
 
 export interface Unit {
-  type: "unit";
+  type: 'unit';
   traits?: Traits;
 }
 

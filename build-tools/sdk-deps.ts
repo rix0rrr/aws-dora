@@ -13,7 +13,7 @@ async function main() {
       shell: false,
       encoding: 'utf-8',
     });
-    const packages = JSON.parse(output) as Array<{ name: string, version: string }>;
+    const packages = JSON.parse(output) as Array<{ name: string; version: string }>;
     const interesting = packages.filter(pkg => pkg.name.startsWith(prefix));
 
     const pj = JSON.parse(await fs.readFile('package.json', 'utf-8'));

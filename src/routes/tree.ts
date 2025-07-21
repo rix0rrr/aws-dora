@@ -20,14 +20,14 @@ function makeTreeRouter(serviceModel: AwsServiceModelView) {
     if (isService(rh)) {
       res.send(renderJSX(ServicesTreeService({
         service: rh,
-        serviceModel
+        serviceModel,
       })));
       return;
     }
     if (isResource(rh)) {
       res.send(renderJSX(ServicesTreeResource({
         resource: rh,
-        serviceModel
+        serviceModel,
       })));
       return;
     }
@@ -37,7 +37,7 @@ function makeTreeRouter(serviceModel: AwsServiceModelView) {
     const search = req.query.search as string || '';
     serviceModel.setFilter(search);
     res.send(renderJSX(ServicesTree({
-      serviceModel
+      serviceModel,
     })));
   });
 
@@ -46,7 +46,7 @@ function makeTreeRouter(serviceModel: AwsServiceModelView) {
 
     serviceModel.setFilter(search);
     res.send(renderJSX(ServicesTree({
-      serviceModel
+      serviceModel,
     })));
   });
 
