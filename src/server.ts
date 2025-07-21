@@ -1,3 +1,4 @@
+import * as path from 'path';
 import express, { Request, Response, NextFunction, Application } from 'express';
 
 import { EmptyRequestForm } from './components/ApiRequestForm';
@@ -44,7 +45,7 @@ async function startup() {
   // Middleware
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  app.use(express.static('public', {
+  app.use(express.static(path.join(__dirname, '..', 'public'), {
     maxAge: NODE_ENV === 'production' ? '1d' : 0,
   }));
 
