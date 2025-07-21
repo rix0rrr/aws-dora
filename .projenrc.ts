@@ -1,4 +1,4 @@
-import { typescript } from 'projen';
+import { ReleasableCommits, typescript } from 'projen';
 import { TypeScriptJsxMode } from 'projen/lib/javascript';
 const project = new typescript.TypeScriptAppProject({
   name: 'aws-dora',
@@ -57,6 +57,10 @@ const project = new typescript.TypeScriptAppProject({
   githubOptions: {
     mergify: false,
   },
+
+  release: true,
+  releaseToNpm: true,
+  releasableCommits: ReleasableCommits.featuresAndFixes(),
 });
 
 project.gitignore.addPatterns('.DS_Store');
