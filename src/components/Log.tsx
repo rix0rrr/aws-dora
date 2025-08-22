@@ -53,29 +53,31 @@ function RenderLogEntry(entry: LogEntry): React.ReactElement {
       {/* Header */}
       <h3 className="font-light text-orange-500 text-lg"
         title={`${timestamp} · ${entry.service} · ${entry.region} · ${entry.credentials.name}`}
-      >{entry.operation}</h3>
+      >{entry.operation}
+        <span className="text-xs text-gray-400 ml-4">{entry.timestamp.toLocaleTimeString()}</span>
+      </h3>
 
       {/* Content (collapsible) */}
       <div>
         {/* Request */}
-        <div>
-          <h5 className="text-sm font-medium text-gray-700 mb-2">Request</h5>
+        <details>
+          <summary className="text-sm font-medium text-gray-700 mb-2 cursor-pointer hover:text-orange-500">Request</summary>
           <pre className="text-2xs overflow-x-auto border-none">
             <code className="language-js border-none">
               {entry.request}
             </code>
           </pre>
-        </div>
+        </details>
 
         {/* Response/Error */}
-        <div>
-          <h5 className="text-sm font-medium text-gray-700 mb-2">Response</h5>
+        <details>
+          <summary className="text-sm font-medium text-gray-700 mb-2 cursor-pointer hover:text-orange-500">Response</summary>
           <pre className="text-2xs overflow-auto max-h-64">
             <code className="language-js">
               {entry.response}
             </code>
           </pre>
-        </div>
+        </details>
       </div>
     </div>
   );
