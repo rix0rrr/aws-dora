@@ -242,6 +242,14 @@
         }
       ]
     },
+    "update:sdk": {
+      "name": "update:sdk",
+      "steps": [
+        {
+          "exec": "build-tools/update-sdk.sh && npx tsx build-tools/parse-model.ts"
+        }
+      ]
+    },
     "upgrade": {
       "name": "upgrade",
       "description": "upgrade dependencies",

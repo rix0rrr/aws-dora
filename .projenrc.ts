@@ -79,5 +79,8 @@ project.npmignore?.addPatterns(
   '!lib/**/*.json',
 );
 
+project.addTask('update:sdk', {
+  exec: 'build-tools/update-sdk.sh && npx tsx build-tools/parse-model.ts',
+});
 
 project.synth();
