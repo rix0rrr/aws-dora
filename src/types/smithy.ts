@@ -95,7 +95,7 @@ export function assertType<T extends Shape['type']>(t: T, s: Shape): Extract<Sha
 }
 
 export function assertValue(s: Shape): Value {
-  if (!['structure', 'list', 'map', 'string', 'boolean', 'integer', 'long', 'double', 'timestamp', 'blob', 'union', 'enum', 'float', 'document'].includes(s.type)) {
+  if (!['structure', 'list', 'map', 'string', 'boolean', 'integer', 'long', 'double', 'timestamp', 'blob', 'union', 'enum', 'float', 'document', 'unit'].includes(s.type)) {
     throw new Error(`Shape ${s.type} is not a value type`);
   }
   return s as any;
