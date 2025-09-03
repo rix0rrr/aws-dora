@@ -1,6 +1,5 @@
 import * as fs from 'fs/promises';
 import path from 'path';
-import { RequestTemplate, FieldDefinition } from '../types';
 import { AWSOperation, AWSResource, AWSResourceHaver, AWSService, AWSServiceList } from '../types/model';
 
 
@@ -89,37 +88,39 @@ export class AwsServiceModelView {
 
     return this.services
       .map(service => {
-        if (this.matches(service.name) || this.matches(service.shortName)) {
+        const serviceHaystacks = [service.name, service.shortName];
+        if (this.matches(serviceHaystacks)) {
           return service;
         }
 
         return {
           ...service,
-          operations: service.operations.filter(matchingOperation),
-          resources: service.resources.map(filterResourceMembers).filter(hasMembers),
+          operations: service.operations.filter(op => matchingOperation(op, serviceHaystacks)),
+          resources: service.resources.map(res => filterResourceMembers(res, serviceHaystacks)).filter(hasMembers),
         };
       }).filter(hasMembers);
 
-    function matchingOperation(op: AWSOperation): boolean {
-      const ret = self.matches(op.name) || self.matches(op.description || '');
+    function matchingOperation(op: AWSOperation, parentStrings: string[]): boolean {
+      const ret = self.matches([...parentStrings, op.name, op.description || '']);
       return ret;
     }
 
-    function filterResourceMembers(resource: AWSResource): AWSResource {
-      if (self.matches(resource.name)) {
+    function filterResourceMembers(resource: AWSResource, parentStrings: string[]): AWSResource {
+      const resourceHaystacks = [...parentStrings, resource.name];
+      if (self.matches(resourceHaystacks)) {
         return resource;
       }
 
       return {
         ...resource,
-        operations: resource.operations.filter(matchingOperation),
-        resources: resource.resources.map(filterResourceMembers).filter(hasMembers),
+        operations: resource.operations.filter(op => matchingOperation(op, resourceHaystacks)),
+        resources: resource.resources.map(res => filterResourceMembers(res, resourceHaystacks)).filter(hasMembers),
       };
     }
   }
 
-  private matches(haystack: string): boolean {
-    return matches(this._currentFilter, haystack);
+  private matches(haystacks: string[]): boolean {
+    return matches(this._currentFilter, haystacks);
   }
 }
 
@@ -127,201 +128,8 @@ function hasMembers(x: AWSResource | AWSService): boolean {
   return x.operations.length > 0 || x.resources.length > 0;
 }
 
-function matches(needle: string, haystack: string): boolean {
+function matches(needle: string, haystacks: string[]): boolean {
   const parts = needle.toLowerCase().split(/\s+/);
-  haystack = haystack.toLowerCase();
-  return parts.every(part => haystack.includes(part));
-}
-
-interface TemplateDefinition {
-  required: Record<string, unknown>;
-  optional: Record<string, unknown>;
-}
-
-// Generate request templates for common operations
-export function getRequestTemplate(service: string, operation: string): RequestTemplate {
-  const templates: Record<string, TemplateDefinition> = {
-    // EC2 Templates
-    'EC2.DescribeInstances': {
-      required: {},
-      optional: {
-        InstanceIds: ['i-1234567890abcdef0'],
-        Filters: [
-          {
-            Name: 'instance-state-name',
-            Values: ['running'],
-          },
-        ],
-        MaxResults: 10,
-      },
-    },
-    'EC2.RunInstances': {
-      required: {
-        ImageId: 'ami-12345678',
-        MinCount: 1,
-        MaxCount: 1,
-      },
-      optional: {
-        InstanceType: 't2.micro',
-        KeyName: 'my-key-pair',
-        SecurityGroupIds: ['sg-12345678'],
-        SubnetId: 'subnet-12345678',
-      },
-    },
-
-    // S3 Templates
-    'S3.ListBuckets': {
-      required: {},
-      optional: {},
-    },
-    'S3.CreateBucket': {
-      required: {
-        Bucket: 'my-bucket-name',
-      },
-      optional: {
-        CreateBucketConfiguration: {
-          LocationConstraint: 'us-west-2',
-        },
-      },
-    },
-    'S3.GetObject': {
-      required: {
-        Bucket: 'my-bucket-name',
-        Key: 'my-object-key',
-      },
-      optional: {
-        Range: 'bytes=0-1023',
-      },
-    },
-
-    // Lambda Templates
-    'Lambda.ListFunctions': {
-      required: {},
-      optional: {
-        MaxItems: 50,
-      },
-    },
-    'Lambda.CreateFunction': {
-      required: {
-        FunctionName: 'my-function',
-        Runtime: 'nodejs18.x',
-        Role: 'arn:aws:iam::123456789012:role/lambda-role',
-        Handler: 'index.handler',
-        Code: {
-          ZipFile: "exports.handler = async (event) => { return 'Hello World'; };",
-        },
-      },
-      optional: {
-        Description: 'My Lambda function',
-        Timeout: 30,
-        MemorySize: 128,
-      },
-    },
-
-    // DynamoDB Templates
-    'DynamoDB.ListTables': {
-      required: {},
-      optional: {
-        Limit: 100,
-      },
-    },
-    'DynamoDB.GetItem': {
-      required: {
-        TableName: 'my-table',
-        Key: {
-          id: {
-            S: '123',
-          },
-        },
-      },
-      optional: {
-        ConsistentRead: true,
-      },
-    },
-
-    // IAM Templates
-    'IAM.ListUsers': {
-      required: {},
-      optional: {
-        MaxItems: 100,
-      },
-    },
-    'IAM.CreateUser': {
-      required: {
-        UserName: 'new-user',
-      },
-      optional: {
-        Path: '/',
-        Tags: [
-          {
-            Key: 'Department',
-            Value: 'Engineering',
-          },
-        ],
-      },
-    },
-  };
-
-  const key = `${service}.${operation}`;
-  const template = templates[key] || {
-    required: {},
-    optional: {
-      // Generic placeholder
-      Parameter: 'value',
-    },
-  };
-
-  // Generate field definitions
-  const fields: Record<string, FieldDefinition> = {};
-
-  Object.keys(template.required).forEach(field => {
-    fields[field] = {
-      type: inferType(template.required[field]),
-      required: true,
-      example: template.required[field],
-    };
-  });
-
-  Object.keys(template.optional).forEach(field => {
-    fields[field] = {
-      type: inferType(template.optional[field]),
-      required: false,
-      example: template.optional[field],
-    };
-  });
-
-  return {
-    service,
-    operation,
-    template: { ...template.required, ...template.optional },
-    fields,
-  };
-}
-
-// Helper function to infer field type
-function inferType(value: unknown): FieldDefinition['type'] {
-  if (typeof value === 'string') return 'string';
-  if (typeof value === 'number') return 'number';
-  if (typeof value === 'boolean') return 'boolean';
-  if (Array.isArray(value)) return 'array';
-  if (typeof value === 'object' && value !== null) return 'object';
-  return 'string';
-}
-
-// Generate a complete request payload combining required and optional fields
-export function generateRequestPayload(service: string, operation: string): Record<string, unknown> {
-  const template = getRequestTemplate(service, operation);
-  return template.template;
-}
-
-// Get field metadata for UI rendering
-export function getFieldMetadata(service: string, operation: string): Record<string, { required: boolean }> {
-  const template = getRequestTemplate(service, operation);
-  const metadata: Record<string, { required: boolean }> = {};
-
-  Object.keys(template.fields).forEach(field => {
-    metadata[field] = { required: template.fields[field]?.required || false };
-  });
-
-  return metadata;
+  haystacks = haystacks.map(x => x.toLowerCase());
+  return parts.every(part => haystacks.some(hay => hay.includes(part)));
 }
