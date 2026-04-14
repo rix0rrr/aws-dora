@@ -119,8 +119,11 @@ function exampleValue(key: string, x: Value, model: SmithyModel): unknown {
           const firstBranch = assertValue(shape(Object.values(vv.members)[0], model));
           return recurse(kk, firstBranch);
         case 'enum':
+        case 'intEnum':
+        {
           const firstShapeRef = Object.values(vv.members)[0];
           return firstShapeRef.traits?.['smithy.api#enumValue'] ?? kk;
+        }
         default:
           assertNever(vv);
       }

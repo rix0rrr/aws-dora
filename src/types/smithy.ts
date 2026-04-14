@@ -5,7 +5,7 @@ export interface SmithyModel {
 }
 
 export type Shape = Service | Resource | Operation | Value;
-export type Value = Structure | PrimitiveType | ListType | MapType | Unit | Union | Enum;
+export type Value = Structure | PrimitiveType | ListType | MapType | Unit | Union | Enum | IntEnum;
 
 export interface ResourceHaver {
   operations?: ShapeRef[];
@@ -56,6 +56,12 @@ export interface Enum {
   traits?: Traits;
 }
 
+export interface IntEnum {
+  type: 'intEnum';
+  members: Record<string, ShapeRef>;
+  traits?: Traits;
+}
+
 export interface Operation {
   type: 'operation';
   input: ShapeRef;
@@ -95,7 +101,7 @@ export function assertType<T extends Shape['type']>(t: T, s: Shape): Extract<Sha
 }
 
 export function assertValue(s: Shape): Value {
-  if (!['structure', 'list', 'map', 'string', 'boolean', 'integer', 'long', 'double', 'timestamp', 'blob', 'union', 'enum', 'float', 'document', 'unit'].includes(s.type)) {
+  if (!['structure', 'list', 'map', 'string', 'boolean', 'integer', 'long', 'double', 'timestamp', 'blob', 'union', 'enum', 'intEnum', 'float', 'document', 'unit'].includes(s.type)) {
     throw new Error(`Shape ${s.type} is not a value type`);
   }
   return s as any;
