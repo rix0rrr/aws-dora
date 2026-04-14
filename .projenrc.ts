@@ -59,6 +59,7 @@ const project = new typescript.TypeScriptAppProject({
   release: true,
   releaseToNpm: true,
   releasableCommits: ReleasableCommits.featuresAndFixes(),
+  npmTrustedPublishing: true,
 });
 
 project.gitignore.addPatterns(
