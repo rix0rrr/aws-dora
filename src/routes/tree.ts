@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { forceString } from './util';
 import { ServicesTree, ServicesTreeResource, ServicesTreeService } from '../components/ServicesTree';
 import { AwsServiceModelView } from '../services/aws-service-model-view';
 import { isResource, isService } from '../types/model';
@@ -10,8 +11,8 @@ function makeTreeRouter(serviceModel: AwsServiceModelView) {
   router.post('/toggle/:node', (req: Request, res: Response): void => {
     const { node } = req.params;
 
-    serviceModel.toggleExpanded(node);
-    const rh = serviceModel.getNodeById(node, 'filtered');
+    serviceModel.toggleExpanded(forceString(node));
+    const rh = serviceModel.getNodeById(forceString(node), 'filtered');
     if (!rh) {
       res.status(404).send(`Node with ID ${node} not found in AWS service model`);
       return;

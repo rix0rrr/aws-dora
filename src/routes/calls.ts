@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { forceString } from './util';
 import { ApiRequestForm } from '../components/ApiRequestForm';
 import { ErrorResponseBox, ResponseBox } from '../components/ResponseBox';
 import { AwsServiceModelView } from '../services/aws-service-model-view';
@@ -14,7 +15,7 @@ function makeCallRouter(serviceModel: AwsServiceModelView, requestLog: RequestLo
   router.get('/:operationId', (req: Request, res: Response): void => {
     const { operationId } = req.params;
 
-    const op = serviceModel.getOperationById(operationId ?? '');
+    const op = serviceModel.getOperationById(forceString(operationId ?? ''));
     if (!op) {
       res.status(400).send(`
         <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -45,7 +46,7 @@ function makeCallRouter(serviceModel: AwsServiceModelView, requestLog: RequestLo
       const credentialsStr: string | undefined = req.body.credentials;
       const request: string | undefined = req.body.request;
       const region: string | undefined = req.body.region;
-      const op = serviceModel.getOperationById(operationId ?? '');
+      const op = serviceModel.getOperationById(forceString(operationId ?? ''));
 
       if (!credentialsStr) {
         throw new Error('Select a credential source');
