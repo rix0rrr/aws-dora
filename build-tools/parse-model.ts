@@ -134,10 +134,12 @@ function exampleValue(key: string, x: Value, model: SmithyModel): unknown {
 }
 
 function parseResourceHaver(id: string, haver: ResourceHaver, model: SmithyModel, serviceId: string, parentNodeId: string): AWSResourceHaver {
+  const allOperations = [...haver.operations ?? [], ...haver.collectionOperations ?? []];
+
   return {
     nodeId: `${parentNodeId}.${localId(id)}`,
     resources: sortByName((haver.resources ?? []).map((r) => parseResource(r.target, assertType('resource', shape(r, model)), model, serviceId, parentNodeId))),
-    operations: sortByName((haver.operations ?? []).map((op) => parseOperation(op.target, assertType('operation', shape(op, model)), model, serviceId))),
+    operations: sortByName(allOperations.map((op) => parseOperation(op.target, assertType('operation', shape(op, model)), model, serviceId))),
   };
 }
 

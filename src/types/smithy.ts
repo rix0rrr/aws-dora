@@ -9,6 +9,7 @@ export type Value = Structure | PrimitiveType | ListType | MapType | Unit | Unio
 
 export interface ResourceHaver {
   operations?: ShapeRef[];
+  collectionOperations?: ShapeRef[];
   resources?: ShapeRef[];
 }
 
