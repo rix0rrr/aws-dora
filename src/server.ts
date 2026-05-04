@@ -87,8 +87,7 @@ async function startup() {
     let srv = app.listen(PORT, (err) => err ? ko(err) : ok(srv));
   });
 
-  console.log(`AWS API Explorer running on http://localhost:${PORT}`);
-  console.log(`Environment: ${NODE_ENV}`);
+  console.log(`AWS API Explorer running on http://localhost:${PORT} (go there in a browser)`);
 
   // Graceful shutdown
   process.on('SIGTERM', (): void => {
