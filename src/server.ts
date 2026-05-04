@@ -16,6 +16,7 @@ import { AwsServiceModelView } from './services/aws-service-model-view';
 import { CredentialViewModel, detectCredentialSources } from './services/credentialsManager';
 import { RequestLog } from './services/request-log';
 import { renderJSX } from './util/jsx';
+import { Server } from 'http';
 
 async function startup() {
   const serviceModel = await AwsServiceModelView.fromBuiltinModel();
@@ -82,39 +83,44 @@ async function startup() {
   });
 
   // Start server
-  const server = app.listen(PORT, (): void => {
-    console.log(`AWS API Explorer running on http://localhost:${PORT}`);
-    console.log(`Environment: ${NODE_ENV}`);
+  const server = await new Promise<Server>((ok, ko) => {
+    let srv = app.listen(PORT, (err) => err ? ko(err) : ok(srv));
   });
+
+  console.log(`AWS API Explorer running on http://localhost:${PORT}`);
+  console.log(`Environment: ${NODE_ENV}`);
 
   // Graceful shutdown
   process.on('SIGTERM', (): void => {
     console.log('SIGTERM received, shutting down gracefully');
-    server.close((): void => {
-      process.exit(0);
-    });
+    server.close();
   });
 
   process.on('SIGINT', (): void => {
     console.log('SIGINT received, shutting down gracefully');
-    server.close((): void => {
-      process.exit(0);
-    });
+    server.close();
   });
 
   // Global error handler
   process.on('uncaughtException', (error: Error): void => {
     console.error('Uncaught Exception:', error);
-    process.exit(1);
+    process.exitCode = 1;
+    server.close();
   });
 
   process.on('unhandledRejection', (reason: any, promise: Promise<any>): void => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    process.exit(1);
+    process.exitCode = 1;
+    server.close();
+  });
+
+  await new Promise((ok, ko) => {
+    server.on('close', ok);
+    server.on('error', ko);
   });
 }
 
 startup().catch((error: Error): void => {
-  console.error('Startup error:', error);
+  console.error(error.message);
   process.exitCode = 1;
 });
