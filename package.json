@@ -38,39 +38,39 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2",
-    "@types/express": "^5.0.3",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.0.10",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "commit-and-tag-version": "^12",
     "constructs": "^10.0.0",
     "eslint": "^9",
-    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
-    "jest": "^30.0.4",
-    "jest-junit": "^16",
-    "nodemon": "^3.1.10",
-    "projen": "^0.99.48",
-    "ts-jest": "^29.4.0",
+    "jest": "^30.4.2",
+    "jest-junit": "^17",
+    "nodemon": "^3.1.14",
+    "projen": "^0.101.11",
+    "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@aws-sdk/credential-providers": "^3.848.0",
-    "@aws-sdk/ec2-metadata-service": "^3.848.0",
-    "@smithy/node-http-handler": "^4.1.0",
-    "@smithy/shared-ini-file-loader": "^4.0.4",
+    "@aws-sdk/credential-providers": "^3.1085.0",
+    "@aws-sdk/ec2-metadata-service": "^3.1085.0",
+    "@smithy/node-http-handler": "^4.9.5",
+    "@smithy/shared-ini-file-loader": "^4.6.8",
     "aws-sdk-js-v3-all": "^3",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "jsonc-parser": "^3.3.1",
     "open": "^10.2.0",
     "proxy-agent": "^6.5.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "tsx": "^4.20.3"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tsx": "^4.23.0"
   },
   "keywords": [
     "api",
@@ -125,7 +125,7 @@
       "^.+\\.[t]sx?$": [
         "ts-jest",
         {
-          "tsconfig": "tsconfig.dev.json"
+          "tsconfig": "test/tsconfig.json"
         }
       ]
     }
