@@ -1,4 +1,8 @@
 {
+  "manifestVersion": 3,
+  "env": {
+    "PATH": "$(npx -c \"node --print process.env.PATH\")"
+  },
   "tasks": {
     "build": {
       "name": "build",
@@ -34,7 +38,7 @@
         "RELEASETAG": "dist/releasetag.txt",
         "RELEASE_TAG_PREFIX": "",
         "BUMP_PACKAGE": "commit-and-tag-version@^12",
-        "RELEASABLE_COMMITS": "git log --no-merges --oneline $LATEST_TAG..HEAD -E --grep \"^(feat|fix){1}(\\([^()[:space:]]+\\))?(!)?:[[:blank:]]+.+\""
+        "RELEASABLE_COMMITS": "git log --no-merges --oneline $LATEST_TAG..HEAD -E --grep '^(feat|fix){1}(\\([^()[:space:]]+\\))?(!)?:[[:blank:]]+.+'"
       },
       "steps": [
         {
@@ -80,7 +84,10 @@
       "description": "Only compile",
       "steps": [
         {
-          "exec": "tsc --build"
+          "execArgs": [
+            "tsc",
+            "--build"
+          ]
         }
       ]
     },
@@ -89,7 +96,12 @@
       "description": "Synthesize project files",
       "steps": [
         {
-          "exec": "ts-node --project tsconfig.dev.json .projenrc.ts"
+          "execArgs": [
+            "ts-node",
+            "--project",
+            "projenrc/tsconfig.json",
+            ".projenrc.ts"
+          ]
         }
       ]
     },
@@ -151,10 +163,19 @@
       "description": "Creates the distribution package",
       "steps": [
         {
-          "exec": "mkdir -p dist/js"
+          "execArgs": [
+            "mkdir",
+            "-p",
+            "dist/js"
+          ]
         },
         {
-          "exec": "npm pack --pack-destination dist/js"
+          "execArgs": [
+            "npm",
+            "pack",
+            "--pack-destination",
+            "dist/js"
+          ]
         }
       ]
     },
@@ -235,7 +256,7 @@
         "RELEASETAG": "dist/releasetag.txt",
         "RELEASE_TAG_PREFIX": "",
         "BUMP_PACKAGE": "commit-and-tag-version@^12",
-        "RELEASABLE_COMMITS": "git log --no-merges --oneline $LATEST_TAG..HEAD -E --grep \"^(feat|fix){1}(\\([^()[:space:]]+\\))?(!)?:[[:blank:]]+.+\""
+        "RELEASABLE_COMMITS": "git log --no-merges --oneline $LATEST_TAG..HEAD -E --grep '^(feat|fix){1}(\\([^()[:space:]]+\\))?(!)?:[[:blank:]]+.+'"
       },
       "steps": [
         {
@@ -259,13 +280,57 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@20 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/express,@types/jest,@types/node,@types/react,@types/react-dom,eslint-import-resolver-typescript,eslint-plugin-import,jest,nodemon,projen,ts-jest,ts-node,typescript,@aws-sdk/credential-providers,@aws-sdk/ec2-metadata-service,@smithy/node-http-handler,@smithy/shared-ini-file-loader,aws-sdk-js-v3-all,express,jsonc-parser,open,proxy-agent,react,react-dom,tsx"
+          "execArgs": [
+            "npx",
+            "npm-check-updates@20",
+            "--upgrade",
+            "--target=minor",
+            "--peer",
+            "--no-deprecated",
+            "--dep=dev,prod,peer,optional",
+            "--filter=@types/express,@types/jest,@types/node,@types/react,@types/react-dom,eslint-import-resolver-typescript,eslint-plugin-import,jest,nodemon,projen,ts-jest,ts-node,typescript,@aws-sdk/credential-providers,@aws-sdk/ec2-metadata-service,@smithy/node-http-handler,@smithy/shared-ini-file-loader,aws-sdk-js-v3-all,express,jsonc-parser,open,proxy-agent,react,react-dom,tsx"
+          ]
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @stylistic/eslint-plugin @types/express @types/jest @types/node @types/react @types/react-dom @typescript-eslint/eslint-plugin @typescript-eslint/parser commit-and-tag-version constructs eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit nodemon projen ts-jest ts-node typescript @aws-sdk/credential-providers @aws-sdk/ec2-metadata-service @smithy/node-http-handler @smithy/shared-ini-file-loader aws-sdk-js-v3-all express jsonc-parser open proxy-agent react react-dom tsx"
+          "execArgs": [
+            "yarn",
+            "upgrade",
+            "@stylistic/eslint-plugin",
+            "@types/express",
+            "@types/jest",
+            "@types/node",
+            "@types/react",
+            "@types/react-dom",
+            "@typescript-eslint/eslint-plugin",
+            "@typescript-eslint/parser",
+            "commit-and-tag-version",
+            "constructs",
+            "eslint-import-resolver-typescript",
+            "eslint-plugin-import",
+            "eslint",
+            "jest",
+            "jest-junit",
+            "nodemon",
+            "projen",
+            "ts-jest",
+            "ts-node",
+            "typescript",
+            "@aws-sdk/credential-providers",
+            "@aws-sdk/ec2-metadata-service",
+            "@smithy/node-http-handler",
+            "@smithy/shared-ini-file-loader",
+            "aws-sdk-js-v3-all",
+            "express",
+            "jsonc-parser",
+            "open",
+            "proxy-agent",
+            "react",
+            "react-dom",
+            "tsx"
+          ]
         },
         {
           "exec": "npx projen"
@@ -280,13 +345,14 @@
       "description": "Watch & compile in the background",
       "steps": [
         {
-          "exec": "tsc --build -w"
+          "execArgs": [
+            "tsc",
+            "--build",
+            "-w"
+          ]
         }
       ]
     }
-  },
-  "env": {
-    "PATH": "$(npx -c \"node --print process.env.PATH\")"
   },
   "//": "~~ Generated by projen. To modify, edit .projenrc.ts and run \"npx projen\"."
 }

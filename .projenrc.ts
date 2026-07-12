@@ -1,4 +1,4 @@
-import { ReleasableCommits, typescript } from 'projen';
+import { JsonFile, ReleasableCommits, typescript } from 'projen';
 import { TypeScriptJsxMode } from 'projen/lib/javascript';
 const project = new typescript.TypeScriptAppProject({
   name: 'aws-dora',
@@ -51,7 +51,10 @@ const project = new typescript.TypeScriptAppProject({
   tsconfigDev: {
     include: ['build-tools/**/*.ts'],
   },
-
+  eslintOptions: {
+    dirs: ['src', 'test'],
+    devdirs: ['build-tools'],
+  },
   githubOptions: {
     mergify: false,
   },
@@ -61,6 +64,24 @@ const project = new typescript.TypeScriptAppProject({
   releasableCommits: ReleasableCommits.featuresAndFixes(),
   npmTrustedPublishing: true,
 });
+
+// Should be a better way of doing this, but this works
+new JsonFile(project, 'build-tools/tsconfig.json', {
+  obj: {
+    extends: '../tsconfig.json',
+    compilerOptions: {
+      noEmit: true,
+      rootDir: '..',
+    },
+    include: [
+      '**/*.ts',
+    ],
+    exclude: [
+      'node_modules',
+    ],
+  },
+});
+
 
 project.gitignore.addPatterns(
   '.DS_Store',
