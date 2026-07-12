@@ -156,7 +156,6 @@
       "error",
       {
         "devDependencies": [
-          "**/test/**",
           "**/build-tools/**",
           ".projenrc.ts",
           "projenrc/**/*.ts"

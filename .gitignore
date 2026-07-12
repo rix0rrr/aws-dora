@@ -47,6 +47,7 @@ junit.xml
 /dist/
 !/.eslintrc.json
 !/projenrc/tsconfig.json
+!/build-tools/tsconfig.json
 .DS_Store
 !public
 !/.projenrc.ts

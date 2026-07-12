@@ -1,3 +1,4 @@
+import { Server } from 'http';
 import * as path from 'path';
 import express, { Request, Response, NextFunction, Application } from 'express';
 
@@ -16,7 +17,6 @@ import { AwsServiceModelView } from './services/aws-service-model-view';
 import { CredentialViewModel, detectCredentialSources } from './services/credentialsManager';
 import { RequestLog } from './services/request-log';
 import { renderJSX } from './util/jsx';
-import { Server } from 'http';
 
 async function startup() {
   const serviceModel = await AwsServiceModelView.fromBuiltinModel();
