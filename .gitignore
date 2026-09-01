@@ -41,12 +41,12 @@ junit.xml
 !/.github/pull_request_template.md
 !/test/
 !/tsconfig.json
-!/test/tsconfig.json
+!/tsconfig.dev.json
 !/src/
 /lib
 /dist/
 !/.eslintrc.json
-!/projenrc/tsconfig.json
+!/.github/workflows/auto-approve.yml
 !/build-tools/tsconfig.json
 .DS_Store
 !public

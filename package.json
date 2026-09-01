@@ -11,7 +11,6 @@
   "scripts": {
     "build": "projen build",
     "bump": "projen bump",
-    "bump:releasable-commits": "projen bump:releasable-commits",
     "clobber": "projen clobber",
     "compile": "projen compile",
     "default": "projen default",
@@ -52,7 +51,7 @@
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "jest": "^30.5.0",
-    "jest-junit": "^17",
+    "jest-junit": "^16",
     "nodemon": "^3.1.14",
     "projen": "^0.103.12",
     "ts-jest": "^29.4.12",
@@ -126,7 +125,7 @@
       "^.+\\.[t]sx?$": [
         "ts-jest",
         {
-          "tsconfig": "test/tsconfig.json"
+          "tsconfig": "tsconfig.dev.json"
         }
       ]
     }

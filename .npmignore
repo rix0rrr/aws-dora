@@ -7,7 +7,7 @@ permissions-backup.acl
 /dist/changelog.md
 /dist/version.txt
 /test/
-/test/tsconfig.json
+/tsconfig.dev.json
 /src/
 !/lib/
 !/lib/**/*.js
@@ -20,7 +20,6 @@ dist
 /.projenrc.js
 tsconfig.tsbuildinfo
 /.eslintrc.json
-/projenrc/tsconfig.json
 vendor/aws-sdk-js-v3/*
 !lib/**/*.json
 /.gitattributes

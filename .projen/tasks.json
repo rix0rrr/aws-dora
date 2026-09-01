@@ -1,8 +1,4 @@
 {
-  "manifestVersion": 3,
-  "env": {
-    "PATH": "$(npx -c \"node --print process.env.PATH\")"
-  },
   "tasks": {
     "build": {
       "name": "build",
@@ -37,36 +33,15 @@
         "BUMPFILE": "dist/version.txt",
         "RELEASETAG": "dist/releasetag.txt",
         "RELEASE_TAG_PREFIX": "",
-        "BUMP_PACKAGE": "commit-and-tag-version@^12"
+        "BUMP_PACKAGE": "commit-and-tag-version@^12",
+        "RELEASABLE_COMMITS": "git log --no-merges --oneline $LATEST_TAG..HEAD -E --grep \"^(feat|fix){1}(\\([^()[:space:]]+\\))?(!)?:[[:blank:]]+.+\""
       },
       "steps": [
         {
-          "builtin": "release/resolve-latest-tag",
-          "outputEnv": "LATEST_TAG"
-        },
-        {
-          "spawn": "bump:releasable-commits",
-          "outputEnv": "RELEASABLE_COMMITS",
-          "condition": "git rev-parse --verify --quiet \"refs/tags/$LATEST_TAG\""
-        },
-        {
-          "builtin": "release/suggest-version-bump",
-          "outputEnv": "SUGGESTED_BUMP"
-        },
-        {
-          "builtin": "release/apply-version-bump"
+          "builtin": "release/bump-version"
         }
       ],
-      "condition": "git log --oneline -1 | grep -v \"chore(release):\" > /dev/null"
-    },
-    "bump:releasable-commits": {
-      "name": "bump:releasable-commits",
-      "description": "Print the releasable commits since the latest release",
-      "steps": [
-        {
-          "exec": "git log --no-merges --oneline $LATEST_TAG..HEAD -E --grep '^(feat|fix){1}(\\([^()[:space:]]+\\))?(!)?:[[:blank:]]+.+'"
-        }
-      ]
+      "condition": "git log --oneline -1 | grep -qv \"chore(release):\""
     },
     "clobber": {
       "name": "clobber",
@@ -76,35 +51,22 @@
       },
       "steps": [
         {
-          "execArgs": [
-            "git",
-            "checkout",
-            "-b",
-            "scratch"
-          ],
+          "exec": "git checkout -b scratch",
           "name": "save current HEAD in \"scratch\" branch"
         },
         {
-          "exec": "git checkout \"$BRANCH\""
+          "exec": "git checkout $BRANCH"
         },
         {
-          "execArgs": [
-            "git",
-            "fetch",
-            "origin"
-          ],
+          "exec": "git fetch origin",
           "name": "fetch latest changes from origin"
         },
         {
-          "exec": "git reset --hard \"origin/$BRANCH\"",
+          "exec": "git reset --hard origin/$BRANCH",
           "name": "hard reset to origin commit"
         },
         {
-          "execArgs": [
-            "git",
-            "clean",
-            "-fdx"
-          ],
+          "exec": "git clean -fdx",
           "name": "clean all untracked files"
         },
         {
@@ -118,10 +80,7 @@
       "description": "Only compile",
       "steps": [
         {
-          "execArgs": [
-            "tsc",
-            "--build"
-          ]
+          "exec": "tsc --build"
         }
       ]
     },
@@ -130,12 +89,7 @@
       "description": "Synthesize project files",
       "steps": [
         {
-          "execArgs": [
-            "ts-node",
-            "--project",
-            "projenrc/tsconfig.json",
-            ".projenrc.ts"
-          ]
+          "exec": "ts-node --project tsconfig.dev.json .projenrc.ts"
         }
       ]
     },
@@ -169,19 +123,7 @@
       },
       "steps": [
         {
-          "execArgs": [
-            "eslint",
-            "--ext",
-            ".ts,.tsx",
-            "--fix",
-            "--no-error-on-unmatched-pattern",
-            "$@",
-            "src",
-            "test",
-            "build-tools",
-            "projenrc",
-            ".projenrc.ts"
-          ],
+          "exec": "eslint --ext .ts,.tsx --fix --no-error-on-unmatched-pattern $@ src test build-tools projenrc .projenrc.ts",
           "receiveArgs": true
         }
       ]
@@ -209,19 +151,10 @@
       "description": "Creates the distribution package",
       "steps": [
         {
-          "execArgs": [
-            "mkdir",
-            "-p",
-            "dist/js"
-          ]
+          "exec": "mkdir -p dist/js"
         },
         {
-          "execArgs": [
-            "npm",
-            "pack",
-            "--pack-destination",
-            "dist/js"
-          ]
+          "exec": "npm pack --pack-destination dist/js"
         }
       ]
     },
@@ -254,11 +187,7 @@
       },
       "steps": [
         {
-          "execArgs": [
-            "rm",
-            "-fr",
-            "dist"
-          ]
+          "exec": "rm -fr dist"
         },
         {
           "spawn": "bump"
@@ -279,11 +208,7 @@
       "description": "Run tests",
       "steps": [
         {
-          "execArgs": [
-            "jest",
-            "--passWithNoTests",
-            "--updateSnapshot"
-          ],
+          "exec": "jest --passWithNoTests --updateSnapshot",
           "receiveArgs": true
         },
         {
@@ -296,10 +221,7 @@
       "description": "Run jest in watch mode",
       "steps": [
         {
-          "execArgs": [
-            "jest",
-            "--watch"
-          ]
+          "exec": "jest --watch"
         }
       ]
     },
@@ -312,7 +234,8 @@
         "BUMPFILE": "dist/version.txt",
         "RELEASETAG": "dist/releasetag.txt",
         "RELEASE_TAG_PREFIX": "",
-        "BUMP_PACKAGE": "commit-and-tag-version@^12"
+        "BUMP_PACKAGE": "commit-and-tag-version@^12",
+        "RELEASABLE_COMMITS": "git log --no-merges --oneline $LATEST_TAG..HEAD -E --grep \"^(feat|fix){1}(\\([^()[:space:]]+\\))?(!)?:[[:blank:]]+.+\""
       },
       "steps": [
         {
@@ -336,57 +259,13 @@
       },
       "steps": [
         {
-          "execArgs": [
-            "npx",
-            "npm-check-updates@20",
-            "--upgrade",
-            "--target=minor",
-            "--peer",
-            "--no-deprecated",
-            "--dep=dev,prod,peer,optional",
-            "--filter=@types/express,@types/jest,@types/node,@types/react,@types/react-dom,eslint-import-resolver-typescript,eslint-plugin-import,jest,nodemon,projen,ts-jest,ts-node,typescript,@aws-sdk/credential-providers,@aws-sdk/ec2-metadata-service,@smithy/node-http-handler,@smithy/shared-ini-file-loader,aws-sdk-js-v3-all,express,jsonc-parser,open,proxy-agent,react,react-dom,tsx"
-          ]
+          "exec": "npx npm-check-updates@20 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/express,@types/jest,@types/node,@types/react,@types/react-dom,eslint-import-resolver-typescript,eslint-plugin-import,jest,nodemon,projen,ts-jest,ts-node,typescript,@aws-sdk/credential-providers,@aws-sdk/ec2-metadata-service,@smithy/node-http-handler,@smithy/shared-ini-file-loader,aws-sdk-js-v3-all,express,jsonc-parser,open,proxy-agent,react,react-dom,tsx"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "execArgs": [
-            "yarn",
-            "upgrade",
-            "@stylistic/eslint-plugin",
-            "@types/express",
-            "@types/jest",
-            "@types/node",
-            "@types/react",
-            "@types/react-dom",
-            "@typescript-eslint/eslint-plugin",
-            "@typescript-eslint/parser",
-            "commit-and-tag-version",
-            "constructs",
-            "eslint-import-resolver-typescript",
-            "eslint-plugin-import",
-            "eslint",
-            "jest",
-            "jest-junit",
-            "nodemon",
-            "projen",
-            "ts-jest",
-            "ts-node",
-            "typescript",
-            "@aws-sdk/credential-providers",
-            "@aws-sdk/ec2-metadata-service",
-            "@smithy/node-http-handler",
-            "@smithy/shared-ini-file-loader",
-            "aws-sdk-js-v3-all",
-            "express",
-            "jsonc-parser",
-            "open",
-            "proxy-agent",
-            "react",
-            "react-dom",
-            "tsx"
-          ]
+          "exec": "yarn upgrade @stylistic/eslint-plugin @types/express @types/jest @types/node @types/react @types/react-dom @typescript-eslint/eslint-plugin @typescript-eslint/parser commit-and-tag-version constructs eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit nodemon projen ts-jest ts-node typescript @aws-sdk/credential-providers @aws-sdk/ec2-metadata-service @smithy/node-http-handler @smithy/shared-ini-file-loader aws-sdk-js-v3-all express jsonc-parser open proxy-agent react react-dom tsx"
         },
         {
           "exec": "npx projen"
@@ -401,14 +280,13 @@
       "description": "Watch & compile in the background",
       "steps": [
         {
-          "execArgs": [
-            "tsc",
-            "--build",
-            "-w"
-          ]
+          "exec": "tsc --build -w"
         }
       ]
     }
+  },
+  "env": {
+    "PATH": "$(npx -c \"node --print process.env.PATH\")"
   },
   "//": "~~ Generated by projen. To modify, edit .projenrc.ts and run \"npx projen\"."
 }

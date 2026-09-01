@@ -1,5 +1,6 @@
 import { JsonFile, ReleasableCommits, typescript } from 'projen';
-import { TypeScriptJsxMode } from 'projen/lib/javascript';
+import { AutoApprove } from 'projen/lib/github';
+import { TypeScriptJsxMode, UpgradeDependenciesSchedule } from 'projen/lib/javascript';
 const project = new typescript.TypeScriptAppProject({
   name: 'aws-dora',
   description: 'Web application for exploring and testing AWS APIs',
@@ -59,10 +60,22 @@ const project = new typescript.TypeScriptAppProject({
     mergify: false,
   },
 
+  depsUpgradeOptions: {
+    workflow: true,
+    workflowOptions: {
+      labels: ['auto-approve'],
+      schedule: UpgradeDependenciesSchedule.WEEKLY,
+    },
+  },
+
   release: true,
   releaseToNpm: true,
   releasableCommits: ReleasableCommits.featuresAndFixes(),
   npmTrustedPublishing: true,
+});
+
+new AutoApprove(project.github!, {
+  allowedUsernames: ['rix0rrr'],
 });
 
 // Should be a better way of doing this, but this works
@@ -104,5 +117,6 @@ project.npmignore?.addPatterns(
 project.addTask('update:sdk', {
   exec: 'build-tools/update-sdk.sh && npx tsx build-tools/parse-model.ts',
 });
+
 
 project.synth();
